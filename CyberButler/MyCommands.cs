@@ -34,6 +34,7 @@ namespace CyberButler
     public class SpotifyGroup
     {
         private static SpotifyWebAPI _spotify = null;
+        private static string playlistID = "";
 
         public SpotifyGroup()
         {
@@ -42,15 +43,14 @@ namespace CyberButler
 
         static async Task MainAsync()
         {
-            // first, let's load our configuration file
             var json = "";
             using (var fs = File.OpenRead("config.json"))
             using (var sr = new StreamReader(fs, new UTF8Encoding(false)))
                 json = await sr.ReadToEndAsync();
 
-            // next, let's load the values from that file
-            // to our client's configuration
             var cfgjson = JsonConvert.DeserializeObject<ConfigJson>(json);
+
+            playlistID = cfgjson.SpotifyPlaylistID;
 
             WebAPIFactory webApiFactory = new WebAPIFactory(
                    "http://localhost",
@@ -80,7 +80,7 @@ namespace CyberButler
                 var profile = _spotify.GetPrivateProfile();
 
                 var userId = profile.Id;
-                var playlistID = "2lM4qM4qd9pcFOfx91GdRh";
+                var playlistID = "";
 
                 ErrorResponse response = _spotify.AddPlaylistTrack(userId, playlistID, URI);
                 if (!response.HasError())
