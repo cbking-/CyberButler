@@ -1,11 +1,13 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
+using DSharpPlus.Net.WebSocket;
 using Newtonsoft.Json;
 
 namespace CyberButler
@@ -22,6 +24,8 @@ namespace CyberButler
 
         static async Task MainAsync(string[] args)
         {
+            ServicePointManager.ServerCertificateValidationCallback = (s, cert, chain, ssl) => true;
+
             var json = "";
             using (var fs = File.OpenRead("config.json"))
             using (var sr = new StreamReader(fs, new UTF8Encoding(false)))
@@ -38,6 +42,8 @@ namespace CyberButler
                 UseInternalLogHandler = true,
                 LogLevel = LogLevel.Debug
             });
+
+            discord.SetWebSocketClient<WebSocketSharpClient>();
 
             discord.MessageCreated += async e =>
             {

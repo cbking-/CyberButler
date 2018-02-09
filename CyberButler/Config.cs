@@ -14,6 +14,9 @@ namespace CyberButler
         [JsonProperty("SpotifyClientID")]
         public string SpotifyClientID { get; set; }
 
+        [JsonProperty("SpotifyClientSecret")]
+        public string SpotifyClientSecret { get; set; }
+
         [JsonProperty("SpotifyPlaylistID")]
         public string SpotifyPlaylistID { get; set; }
     }
