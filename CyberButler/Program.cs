@@ -24,17 +24,21 @@ namespace CyberButler
 
         static async Task MainAsync(string[] args)
         {
+            //Since this is running from Ubuntu Server using Mono, this line is a SSL certificate validation override.
             ServicePointManager.ServerCertificateValidationCallback = (s, cert, chain, ssl) => true;
 
+            //Load configuration
             var json = "";
             using (var fs = File.OpenRead("config.json"))
-            using (var sr = new StreamReader(fs, new UTF8Encoding(false)))
-                json = await sr.ReadToEndAsync();
-
-            // next, let's load the values from that file
-            // to our client's configuration
+            {
+                using (var sr = new StreamReader(fs, new UTF8Encoding(false)))
+                {
+                    json = await sr.ReadToEndAsync();
+                }
+            }
             var cfgjson = JsonConvert.DeserializeObject<ConfigJson>(json);
 
+            //Create the Discord client
             discord = new DiscordClient(new DiscordConfiguration
             {
                 Token = cfgjson.DiscordToken,
@@ -43,14 +47,17 @@ namespace CyberButler
                 LogLevel = LogLevel.Debug
             });
 
+            //Since this is running from Ubuntu Server using Mono, a different web socket is needed.
             discord.SetWebSocketClient<WebSocketSharpClient>();
 
+            //CyberButler will emote some business terms. He only likes touching bases at the moment.
             discord.MessageCreated += async e =>
             {
                 if (e.Message.Content.ToLower().Contains("touch base"))
                     await e.Message.RespondAsync(":right_facing_fist: :left_facing_fist: :right_facing_fist: :left_facing_fist:");
             };
 
+            //Create the commands configuration suing the prefix defined in the config file
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
                 StringPrefix = cfgjson.CommandPrefix

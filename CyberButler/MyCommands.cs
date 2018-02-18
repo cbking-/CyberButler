@@ -98,8 +98,11 @@ namespace CyberButler
 
         private static async Task CleanPlaylist()
         {
+            //While this async method isn't awaited, it still yields control due to the Task.Delay() call.
+            //Method is based on https://blogs.msdn.microsoft.com/benwilli/2016/06/30/asynchronous-infinite-loops-instead-of-timers/
+
             if (_spotify == null)
-                return;
+                Console.WriteLine($"Spotify is not loaded.");
             else
             {
                 PlaybackContext context = _spotify.GetPlayingTrack();
@@ -107,12 +110,15 @@ namespace CyberButler
 
                 while (true)
                 {
+                    //refresh authorization token
                     auth.RefreshToken(token.RefreshToken, SpotifyClientSecret);
+
                     context = _spotify.GetPlayingTrack();
 
+                    //Determine if Spotify has changed tracks in the playlist
                     if ((context.Item != null) && (prevTrack != context.Item.Id))
                     {
-                        //remove prev track
+                        //remove previous track
                         ErrorResponse response = _spotify.RemovePlaylistTrack(userID, playlistID, new DeleteTrackUri($"spotify:track:{prevTrack}"));
                         if (!response.HasError())
                             prevTrack = context.Item.Id;
@@ -120,6 +126,8 @@ namespace CyberButler
                             Console.WriteLine($"Could not remove track. {response.Error.Message}");
                         
                     }
+
+                    //Do this every 30 seconds
                     await Task.Delay(30000);
                 }
             }
@@ -129,26 +137,49 @@ namespace CyberButler
         public async Task Add(CommandContext ctx, string URI)
         {
             if (_spotify == null)
-                return;
+                await ctx.RespondAsync($"Spotify is not loaded.");
             else
             {
+                //refresh authorization token
                 auth.RefreshToken(token.RefreshToken, SpotifyClientSecret);
 
+                //Search Spotify if the user did not provide a URI
+                if (!URI.Contains("spotify:track"))
+                {
+                    //Encode spaces as +
+                    SearchItem item = _spotify.SearchItems(URI.Replace(' ', '+'), SearchType.Track);
+
+                    //Use the first track found
+                    URI = item.Tracks.Items[0].Uri;
+                }
+
+                //Get the playlist's tracks
                 Paging<PlaylistTrack> playlist = _spotify.GetPlaylistTracks(userID, playlistID);
 
+                //Check if the track being requested is already in the playlist. Spotify does not
+                //  prevent duplicate tracks from being added to a playlist through their API.
                 if (!playlist.Items.Any(track => $"spotify:track:{track.Track.Id}" == URI))
                 {
+                    //Attempt to add the track to the playlist
                     ErrorResponse response = _spotify.AddPlaylistTrack(userID, playlistID, URI);
 
                     if (!response.HasError())
                     {
                         await ctx.RespondAsync($"Track added.");
 
+                        //Determine if the current playing context is the playlist
                         PlaybackContext context = _spotify.GetPlayingTrack();
 
+                        //If the currently played track is not in the playlist, then the playing context needs to be switched.
                         if (!playlist.Items.Any(track => track.Track.Id == context.Item.Id))
                         {
-                            response = _spotify.ResumePlayback(contextUri: $"spotify:user:{userID}:playlist:{playlistID}");
+                            //In CyberButler's case, there should only be one Spotify device so choose the first device.
+                            string deviceId = _spotify.GetDevices().Devices[0].Id;
+
+                            string contextUri = $"spotify:user:{userID}:playlist:{playlistID}";
+
+                            //Attempt to change the playback context
+                            response = _spotify.ResumePlayback(deviceId: deviceId, contextUri: contextUri);
 
                             if (response.HasError())
                                 await ctx.RespondAsync($"Could not start playback. {response.Error.Message}");
@@ -168,14 +199,17 @@ namespace CyberButler
         public async Task Next(CommandContext ctx)
         {
             if (_spotify == null)
-                return;
+                await ctx.RespondAsync($"Spotify is not loaded.");
             else
             {
+                //refresh authorization token
                 auth.RefreshToken(token.RefreshToken, SpotifyClientSecret);
+
+                //Attempt to go to the next track.
                 ErrorResponse response = _spotify.SkipPlaybackToNext();
 
                 if (response.HasError())
-                    await ctx.RespondAsync($"Could not add track. {response.Error.Message}");
+                    await ctx.RespondAsync($"Could go to next track. {response.Error.Message}");
             }
         }
     }
