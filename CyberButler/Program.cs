@@ -1,14 +1,12 @@
 ﻿using System;
-using System.IO;
+using System.Configuration;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.Net.WebSocket;
-using Newtonsoft.Json;
 
 namespace CyberButler
 {
@@ -27,21 +25,10 @@ namespace CyberButler
             //Since this is running from Ubuntu Server using Mono, this line is a SSL certificate validation override.
             ServicePointManager.ServerCertificateValidationCallback = (s, cert, chain, ssl) => true;
 
-            //Load configuration
-            var json = "";
-            using (var fs = File.OpenRead("config.json"))
-            {
-                using (var sr = new StreamReader(fs, new UTF8Encoding(false)))
-                {
-                    json = await sr.ReadToEndAsync();
-                }
-            }
-            var cfgjson = JsonConvert.DeserializeObject<ConfigJson>(json);
-
             //Create the Discord client
             discord = new DiscordClient(new DiscordConfiguration
             {
-                Token = cfgjson.DiscordToken,
+                Token = ConfigurationManager.AppSettings["DiscordToken"].ToString(),
                 TokenType = TokenType.Bot,
                 UseInternalLogHandler = true,
                 LogLevel = LogLevel.Debug
@@ -60,7 +47,7 @@ namespace CyberButler
             //Create the commands configuration suing the prefix defined in the config file
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
-                StringPrefix = cfgjson.CommandPrefix
+                StringPrefix = ConfigurationManager.AppSettings["CommandPrefix"].ToString()
             });
 
             commands.CommandErrored += Commands_CommandErrored;
@@ -74,7 +61,14 @@ namespace CyberButler
         private static async Task Commands_CommandErrored(CommandErrorEventArgs e)
         {
             // let's log the error details
-            e.Context.Client.DebugLogger.LogMessage(LogLevel.Error, "CyberButler", $"{e.Context.User.Username} tried executing '{e.Command?.QualifiedName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}", DateTime.Now);
+            e.Context.Client.DebugLogger.LogMessage(
+                LogLevel.Error, 
+                "CyberButler", 
+                $"{e.Context.User.Username} tried executing '" +
+                $"{e.Command?.QualifiedName ?? "<unknown command>"}' " +
+                $"but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}." +
+                $"Stack trace:{e.Exception.StackTrace}"
+                , DateTime.Now);
 
             // let's check if the error is a result of lack
             // of required permissions
