@@ -6,15 +6,13 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity;
 using DSharpPlus.Net.WebSocket;
 
 namespace CyberButler
 {
     class Program
     {
-        static DiscordClient discord;
-        static CommandsNextModule commands;
-
         static void Main(string[] args)
         {
             MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult(); 
@@ -22,6 +20,9 @@ namespace CyberButler
 
         static async Task MainAsync(string[] args)
         {
+            DiscordClient discord;
+            CommandsNextModule commands;
+
             //Since this is running from Ubuntu Server using Mono, this line is a SSL certificate validation override.
             ServicePointManager.ServerCertificateValidationCallback = (s, cert, chain, ssl) => true;
 
@@ -43,6 +44,18 @@ namespace CyberButler
                 if (e.Message.Content.ToLower().Contains("touch base"))
                     await e.Message.RespondAsync(":right_facing_fist: :left_facing_fist: :right_facing_fist: :left_facing_fist:");
             };
+
+            discord.UseInteractivity(new InteractivityConfiguration
+            {
+                // default pagination behaviour to just ignore the reactions
+                PaginationBehaviour = TimeoutBehaviour.Ignore,
+
+                // default pagination timeout to 5 minutes
+                PaginationTimeout = TimeSpan.FromMinutes(5),
+
+                // default timeout for other actions to 2 minutes
+                Timeout = TimeSpan.FromMinutes(2)
+            });
 
             //Create the commands configuration suing the prefix defined in the config file
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
