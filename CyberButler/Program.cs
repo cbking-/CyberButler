@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -38,13 +39,6 @@ namespace CyberButler
             //Since this is running from Ubuntu Server using Mono, a different web socket is needed.
             discord.SetWebSocketClient<WebSocketSharpClient>();
 
-            //CyberButler will emote some business terms. He only likes touching bases at the moment.
-            discord.MessageCreated += async e =>
-            {
-                if (e.Message.Content.ToLower().Contains("touch base"))
-                    await e.Message.RespondAsync(":right_facing_fist: :left_facing_fist: :right_facing_fist: :left_facing_fist:");
-            };
-
             discord.UseInteractivity(new InteractivityConfiguration
             {
                 // default pagination behaviour to just ignore the reactions
@@ -65,7 +59,34 @@ namespace CyberButler
 
             commands.CommandErrored += Commands_CommandErrored;
             commands.RegisterCommands<MyCommands>();
-            commands.RegisterCommands<SpotifyGroup>();
+            //commands.RegisterCommands<SpotifyGroup>();
+
+            //CyberButler will emote some business terms. He only likes touching bases at the moment.
+            discord.MessageCreated += async e =>
+            {
+                var rgx = new Regex(@"touch(ing|ed)? base(s)?");
+                var author = (DiscordMember) e.Author;
+
+                if (rgx.IsMatch(e.Message.Content.ToLower()))
+                {
+                    await e.Message.RespondAsync(":right_facing_fist: :left_facing_fist: :right_facing_fist: :left_facing_fist:");
+                }
+
+                if (e.Message.ToString().ToLower().Contains("donger") && e.Author.Username != "CyberButler")
+                {
+                    await e.Message.RespondAsync($"ヽ༼ຈل͜ຈ༽ﾉ raise your dongers ヽ༼ຈل͜ຈ༽ﾉ");
+                }
+
+                if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday)
+                {
+                    await e.Message.CreateReactionAsync(DiscordEmoji.FromName(discord, ":wednesday:"));
+                }
+
+                if (author.Nickname.ToLower().Contains("goat"))
+                {
+                    await e.Message.CreateReactionAsync(DiscordEmoji.FromName(discord, ":goat:"));
+                }
+            };
 
             await discord.ConnectAsync();
             await Task.Delay(-1);

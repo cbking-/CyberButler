@@ -19,9 +19,30 @@ namespace CyberButler
     public class MyCommands
     {
         [Command("restaurant")]
+        [Aliases("foodlibrary")]
+        [Description("You meat bags need a man of steel to tell them where to eat, huh?")]
         public async Task Restaurant(CommandContext ctx)
         {
-            await ctx.RespondAsync($"Tony Paco's");
+            var restaurants = new List<String>();
+            restaurants.Add("Tony Paco's");
+            restaurants.Add("Subway");
+            restaurants.Add("Arby's");
+            restaurants.Add("Wendy's");
+            restaurants.Add("Chipotle");
+            restaurants.Add("Bangcock Kitchen");
+            restaurants.Add("Steak Escape");
+            restaurants.Add("Buffalo Wild Wings");
+            restaurants.Add("Taco Bell");
+            restaurants.Add("Burger King");
+            restaurants.Add("Five Guys");
+            restaurants.Add("McDonald's");
+            restaurants.Add("Jimmy Johns");
+            restaurants.Add("Penn Station");
+            restaurants.Add("Tropical Smoothy Cafe");
+
+            var random = new Random();
+
+            await ctx.RespondAsync(restaurants[random.Next(restaurants.Count)]);
         }
 
         [Command("random")]
@@ -29,6 +50,13 @@ namespace CyberButler
         {
             var random = new Random();
             await ctx.RespondAsync($" Your random number is: {random.Next(min, max)}");
+        }
+
+        [Command("sweepstakes")]
+        [Description("You'll never actually win anything but you'll keep entering. Predictable.")]
+        public async Task Sweepstakes(CommandContext ctx)
+        {
+            await ctx.RespondAsync($"You have been entered to win.");
         }
     }
 
