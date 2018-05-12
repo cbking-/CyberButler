@@ -7,6 +7,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Net.WebSocket;
 
@@ -51,7 +52,7 @@ namespace CyberButler
                 Timeout = TimeSpan.FromMinutes(2)
             });
 
-            //Create the commands configuration suing the prefix defined in the config file
+            //Create the commands configuration using the prefix defined in the config file
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
                 StringPrefix = ConfigurationManager.AppSettings["CommandPrefix"].ToString()
@@ -60,36 +61,38 @@ namespace CyberButler
             commands.CommandErrored += Commands_CommandErrored;
             commands.RegisterCommands<MyCommands>();
             //commands.RegisterCommands<SpotifyGroup>();
-
-            //CyberButler will emote some business terms. He only likes touching bases at the moment.
-            discord.MessageCreated += async e =>
-            {
-                var rgx = new Regex(@"touch(ing|ed)? base(s)?");
-                var author = (DiscordMember) e.Author;
-
-                if (rgx.IsMatch(e.Message.Content.ToLower()))
-                {
-                    await e.Message.RespondAsync(":right_facing_fist: :left_facing_fist: :right_facing_fist: :left_facing_fist:");
-                }
-
-                if (e.Message.ToString().ToLower().Contains("donger") && e.Author.Username != "CyberButler")
-                {
-                    await e.Message.RespondAsync($"ヽ༼ຈل͜ຈ༽ﾉ raise your dongers ヽ༼ຈل͜ຈ༽ﾉ");
-                }
-
-                if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday)
-                {
-                    await e.Message.CreateReactionAsync(DiscordEmoji.FromName(discord, ":wednesday:"));
-                }
-
-                if (author.Nickname.ToLower().Contains("goat"))
-                {
-                    await e.Message.CreateReactionAsync(DiscordEmoji.FromName(discord, ":goat:"));
-                }
-            };
+            
+            discord.MessageCreated += MessageCreated;
 
             await discord.ConnectAsync();
             await Task.Delay(-1);
+        }
+
+        private static async Task MessageCreated(MessageCreateEventArgs e)
+        {
+            var rgx = new Regex(@"touch(ing|ed)? base(s)?");
+            var author = (DiscordMember)e.Author;
+            var client = (DiscordClient)e.Client;
+
+            if (rgx.IsMatch(e.Message.Content.ToLower()))
+            {
+                await e.Message.RespondAsync(":right_facing_fist: :left_facing_fist: :right_facing_fist: :left_facing_fist:");
+            }
+
+            if (e.Message.ToString().ToLower().Contains("donger") && e.Author.Username != "CyberButler")
+            {
+                await e.Message.RespondAsync($"ヽ༼ຈل͜ຈ༽ﾉ raise your dongers ヽ༼ຈل͜ຈ༽ﾉ");
+            }
+
+            if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday)
+            {
+                await e.Message.CreateReactionAsync(DiscordEmoji.FromName(client, ":wednesday:"));
+            }
+
+            if (author.Nickname.ToLower().Contains("goat"))
+            {
+                await e.Message.CreateReactionAsync(DiscordEmoji.FromName(client, ":goat:"));
+            }
         }
 
         private static async Task Commands_CommandErrored(CommandErrorEventArgs e)
