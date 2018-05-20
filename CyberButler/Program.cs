@@ -79,7 +79,7 @@ namespace CyberButler
                 await e.Message.RespondAsync(":right_facing_fist: :left_facing_fist: :right_facing_fist: :left_facing_fist:");
             }
 
-            if (e.Message.ToString().ToLower().Contains("donger") && e.Author.Username != "CyberButler")
+            if (e.Message.ToString().ToLower().Contains("donger") && !author.IsBot)
             {
                 await e.Message.RespondAsync($"ヽ༼ຈل͜ຈ༽ﾉ raise your dongers ヽ༼ຈل͜ຈ༽ﾉ");
             }

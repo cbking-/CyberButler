@@ -8,6 +8,7 @@ using SpotifyAPI.Web.Enums;
 using SpotifyAPI.Web.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.Linq;
 using System.Threading;
@@ -35,7 +36,7 @@ namespace CyberButler
             };
 
             //This will be called, if the user cancled/accept the auth-request
-            auth.OnResponseReceivedEvent += (AutorizationCodeAuthResponse response) =>
+            auth.OnResponseReceivedEvent += async (AutorizationCodeAuthResponse response) =>
             {
 
                 Token token = auth.ExchangeAuthCode(response.Code, SpotifyClientSecret);
@@ -50,10 +51,10 @@ namespace CyberButler
                 auth.StopHttpServer();
 
                 //Refresh token as needed
-                TokenRefresh(auth, token.RefreshToken, SpotifyClientSecret);
+                await TokenRefreshAsync(auth, token.RefreshToken, SpotifyClientSecret);
 
                 //Start playlist cleaner
-                CleanPlaylist(SpotifyPlaylistId);
+                await CleanPlaylistAsync(SpotifyPlaylistId);
             };
 
             //a local HTTP Server will be started (Needed for the response)
@@ -62,7 +63,7 @@ namespace CyberButler
             auth.DoAuth();
         }
 
-        private static async Task TokenRefresh(AutorizationCodeAuth auth, string RefreshToken, string SpotifyClientSecret)
+        private static async Task TokenRefreshAsync(AutorizationCodeAuth auth, string RefreshToken, string SpotifyClientSecret)
         {
             //While this async method isn't awaited, it still yields control due to the Task.Delay() call.
             //Method is based on https://blogs.msdn.microsoft.com/benwilli/2016/06/30/asynchronous-infinite-loops-instead-of-timers/
@@ -75,7 +76,7 @@ namespace CyberButler
             }
         }
 
-        private static async Task CleanPlaylist(string playlistID)
+        private static async Task CleanPlaylistAsync(string playlistID)
         {
             //While this async method isn't awaited, it still yields control due to the Task.Delay() call.
             //Method is based on https://blogs.msdn.microsoft.com/benwilli/2016/06/30/asynchronous-infinite-loops-instead-of-timers/
