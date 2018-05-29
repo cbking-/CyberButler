@@ -3,6 +3,8 @@ using System.Configuration;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using CyberButler.Commands;
+using CyberButler.DatabaseRecords;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
@@ -15,6 +17,8 @@ namespace CyberButler
 {
     class Program
     {
+
+
         static void Main(string[] args)
         {
             MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult(); 
@@ -60,9 +64,14 @@ namespace CyberButler
 
             commands.CommandErrored += Commands_CommandErrored;
             commands.RegisterCommands<MyCommands>();
+            commands.RegisterCommands<Restaurant>();
+
             //commands.RegisterCommands<SpotifyGroup>();
             
             discord.MessageCreated += MessageCreated;
+            discord.GuildMemberUpdated += DisplayNameChanged;
+            discord.MessageReactionAdded += ReactionAdded;
+            discord.MessageReactionRemoved += ReactionRemoved;
 
             await discord.ConnectAsync();
             await Task.Delay(-1);
@@ -95,6 +104,33 @@ namespace CyberButler
             }
         }
 
+        private static async Task DisplayNameChanged(GuildMemberUpdateEventArgs e)
+        {
+            if (e.NicknameAfter != e.NicknameBefore)
+            {
+                var record = new UsernameHistoryRecord
+                {
+                    Server = e.Guild.Name,
+                    UserID = e.Member.Username + '#' + e.Member.Discriminator,
+                    NameBefore = e.NicknameBefore,
+                    NameAfter = e.NicknameAfter
+                };
+
+                record.Insert();
+            }
+
+            await Task.CompletedTask;
+        }
+
+        private static async Task ReactionAdded(MessageReactionAddEventArgs e)
+        {
+            await Task.CompletedTask;
+        }
+
+        private static async Task ReactionRemoved(MessageReactionRemoveEventArgs e)
+        {
+            await Task.CompletedTask;
+        }
         private static async Task Commands_CommandErrored(CommandErrorEventArgs e)
         {
             // let's log the error details
@@ -127,6 +163,12 @@ namespace CyberButler
                 };
                 await e.Context.RespondAsync("", embed: embed);
             }
+        }
+
+        public async void ScheduleAction(Action action, DateTime ExecutionTime)
+        {
+            await Task.Delay((int)ExecutionTime.Subtract(DateTime.Now).TotalMilliseconds);
+            action();
         }
     }
 }

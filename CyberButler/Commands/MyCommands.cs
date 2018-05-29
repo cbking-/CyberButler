@@ -5,69 +5,10 @@ using DSharpPlus.CommandsNext.Attributes;
 using System.Collections.Generic;
 using DSharpPlus.Interactivity;
 
-namespace CyberButler
+namespace CyberButler.Commands
 {
-
     public class MyCommands
     {
-        [Command("restaurant")]
-        [Aliases("foodlibrary")]
-        [Description("You meat bags need a man of steel to tell them where to eat, huh?")]
-        public async Task Restaurant(CommandContext ctx)
-        {
-            string response = "";
-
-            if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday)
-            {
-                await ctx.RespondAsync("Is it nice out? (Yes/No)");
-                var interactivity = ctx.Client.GetInteractivityModule();
-                var msg = await interactivity.WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id, TimeSpan.FromMinutes(1));
-
-                if (msg.Message.Content.ToLower() == "yes")
-                {
-                    response = "Food Trucks";
-                }
-                else
-                {
-                    response = RestaurantResponse();
-                }
-            }
-            else
-            {
-                response = RestaurantResponse();
-            }
-
-            await ctx.RespondAsync($"Go eat at {response}");
-        }
-
-        private String RestaurantResponse()
-        {
-            var restaurants = new List<String>
-            {
-                "Tony Paco's",
-                "Subway",
-                "Arby's",
-                "Wendy's",
-                "Chipotle",
-                "Bangcock Kitchen",
-                "Steak Escape",
-                "Buffalo Wild Wings",
-                "Taco Bell",
-                "Burger King",
-                "Five Guys",
-                "McDonald's",
-                "Jimmy Johns",
-                "Penn Station",
-                "Tropical Smoothy Cafe",
-                "Hot Head Burritos",
-                "Chick-fil-A"
-            };
-
-            var random = new Random();
-
-            return restaurants[random.Next(restaurants.Count)];
-        }
-
         [Command("random")]
         public async Task Random(CommandContext ctx, int min, int max)
         {
@@ -91,7 +32,7 @@ namespace CyberButler
 
         [Command("eightball")]
         [Aliases("8ball")]
-        [Description("Place important descisions in the hands of RNGesus")]
+        [Description("Place important decisions in the hands of RNGesus")]
         public async Task EightBall(CommandContext ctx)
         {
             var responses = new List<String>
