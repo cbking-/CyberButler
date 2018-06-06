@@ -9,13 +9,13 @@ There’s no System.Data.SQLite package for Linux, so you’ll have to build it 
 1. Unzip it and transfer it to a directory on your Linux machine. In the rest of this description, I’ll call this directory “<source root>”.
 1. Issue these commands in a Linux terminal:
 
-    ```sudo apt-get update
-    sudo apt-get install build-essential
-    cd <source root>/Setup
-    chmod +x compile-interop-assembly-release.sh
-    ./compile-interop-assembly-release.sh
-    ```
-3. Now, you will have a freshly built library file called libSQLite.Interop.so in the <source root>/bin/2013/Release/bin directory. This file might have execution permission which isn’t relevant for a library, so remove it by
+        sudo apt-get update
+        sudo apt-get install build-essential
+        cd <source root>/Setup
+        chmod +x compile-interop-assembly-release.sh
+        ./compile-interop-assembly-release.sh  
+
+1. Now, you will have a freshly built library file called libSQLite.Interop.so in the <source root>/bin/2013/Release/bin directory. This file might have execution permission which isn’t relevant for a library, so remove it by
 `chmod -x <source root>/bin/2013/Release/bin/libSQLite.Interop.so`
 1. Copy libSQLite.Interop.so the directory where your Mono/.NET application’s binaries reside (not the x64 or x86 subdirectories containing SQLite.Interop.dll), and you’re set to go.
 
