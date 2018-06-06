@@ -3,7 +3,6 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Interactivity;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace CyberButler.Commands
