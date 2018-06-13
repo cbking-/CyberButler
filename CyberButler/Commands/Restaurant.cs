@@ -28,35 +28,35 @@ namespace CyberButler.Commands
                 }
                 else
                 {
-                    response = RestaurantResponse();
+                    response = RestaurantResponse(ctx.Guild.Name);
                 }
             }
             else
             {
-                response = RestaurantResponse();
+                response = RestaurantResponse(ctx.Guild.Name);
             }
 
             await ctx.RespondAsync($"Go eat at {response}");
         }
 
-        private String RestaurantResponse()
+        private String RestaurantResponse(String _server)
         {
-            return new RestaurantRecord().SelectRandom();
+            return new RestaurantRecord().SelectRandom(_server);
         }
 
         [Command("add")]
         [Description("!restaurant add \"New Restaurant\". It does not check for duplicates.")]
-        public async Task Add(CommandContext ctx, String _restaurant)
+        public async Task Add(CommandContext ctx, params String[] _restaurant)
         {
             var record = new RestaurantRecord
             {
                 Server = ctx.Guild.Name,
-                Restaurant = _restaurant
+                Restaurant = String.Join(" ", _restaurant)
             };
 
             record.Insert();
 
-            await ctx.RespondAsync($"Added {record.Restaurant} to {record.Server}.");
+            await ctx.RespondAsync($"Added \"{record.Restaurant}\" to {record.Server}.");
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 
 namespace CyberButler.DatabaseRecords
@@ -10,12 +11,26 @@ namespace CyberButler.DatabaseRecords
 
         public override void Insert()
         {
-            db.Insert($"insert into restaurant (server, restaurant) values ('{Server}', '{Restaurant}')");
+            var statement = $"insert into restaurant (server, restaurant) values ('@server', '@restaurant')";
+            var parameters = new Dictionary<String, String>
+            {
+                { "@server", Server },
+                { "@restaurant", Restaurant }
+            };
+
+            db.Insert(statement, parameters);
         }
 
-        public String SelectRandom()
+        public String SelectRandom(string _server)
         {
-            DataTable dt = db.Select("select restaurant from restaurant order by random() limit 1");
+            var query = $"select restaurant from restaurant where server = @server order by random() limit 1";
+
+            var parameters = new Dictionary<String, String>
+            {
+                { "@server", _server }
+            };
+
+            DataTable dt = db.Select(query, parameters);
             return dt.Rows[0]["restaurant"].ToString();
         }
     }

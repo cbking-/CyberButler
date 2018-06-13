@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using System.Collections.Generic;
-using DSharpPlus.Interactivity;
 
 namespace CyberButler.Commands
 {
@@ -33,7 +32,7 @@ namespace CyberButler.Commands
         [Command("eightball")]
         [Aliases("8ball")]
         [Description("Place important decisions in the hands of RNGesus")]
-        public async Task EightBall(CommandContext ctx)
+        public async Task EightBall(CommandContext ctx, params String[] _question)
         {
             var responses = new List<String>
             {
@@ -63,6 +62,12 @@ namespace CyberButler.Commands
 
             await ctx.RespondAsync(responses[random.Next(responses.Count)]);
         }
-    }
 
+        [Command("source")]
+        [Description("Source code remote repository.")]
+        public async Task Source(CommandContext ctx)
+        {
+            await ctx.RespondAsync($"https://github.com/cbking-/CyberButler");
+        }
+    }
 }
