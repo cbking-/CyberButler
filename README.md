@@ -5,7 +5,7 @@ CyberButler Discord Bot
 
 There’s no System.Data.SQLite package for Linux, so you’ll have to build it yourself on your target Linux machine. You can build using this procedure, which is tested in Raspbian Jessie on a Raspberry Pi 3 and Ubuntu 16.04.1 on a PC:
 
-1. Download System.Data.SQLite full source code from this download page. There’s a ton of files there, and the one you should look for is named something like sqlite-netFx-full-source-<version no>.zip.
+1. Download System.Data.SQLite full source code from [this download page](https://system.data.sqlite.org/index.html/doc/trunk/www/downloads.wiki). There’s a ton of files there, and the one you should look for is named something like sqlite-netFx-full-source-<version no>.zip.
 1. Unzip it and transfer it to a directory on your Linux machine. In the rest of this description, I’ll call this directory “<source root>”.
 1. Issue these commands in a Linux terminal:
 
