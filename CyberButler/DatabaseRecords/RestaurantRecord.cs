@@ -11,7 +11,7 @@ namespace CyberButler.DatabaseRecords
 
         public override void Insert()
         {
-            var statement = $"insert into restaurant (server, restaurant) values ('@server', '@restaurant')";
+            var statement = $"insert into restaurant (server, restaurant) values (@server, @restaurant)";
             var parameters = new Dictionary<String, String>
             {
                 { "@server", Server },
