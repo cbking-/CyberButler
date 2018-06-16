@@ -1,8 +1,11 @@
 ﻿using CyberButler.DatabaseRecords;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Interactivity;
+using Newtonsoft.Json;
 using System;
+using System.Configuration;
+using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace CyberButler.Commands
@@ -14,26 +17,31 @@ namespace CyberButler.Commands
         [Description("I'm gonna tell you where to eat but you probably won't listen.")]
         public async Task ExecuteGroupAsync(CommandContext ctx)
         {
-            string response = "";
+            string response = RestaurantResponse(ctx.Guild.Name); ;
 
             if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday)
             {
-                await ctx.RespondAsync("Is it nice out? (Yes/No)");
-                var interactivity = ctx.Client.GetInteractivityModule();
-                var msg = await interactivity.WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id, TimeSpan.FromMinutes(1));
+                var openWeatherURL = $"https://api.openweathermap.org/data/2.5/weather?zip=45840&appid={ConfigurationManager.AppSettings["OpenWeatherMapKey"].ToString()}";
 
-                if (msg.Message.Content.ToLower() == "yes")
+                var request = (HttpWebRequest)WebRequest.Create(openWeatherURL);
+
+                using (HttpWebResponse webResponse = (HttpWebResponse)await request.GetResponseAsync())
                 {
-                    response = "Food Trucks";
+                    using (var stream = webResponse.GetResponseStream())
+                    {
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var result = JsonConvert.DeserializeObject<dynamic>(await reader.ReadToEndAsync());
+                            var temp = result["main"]["temp"] * (9/5) - 459.67;
+                            var rain = result["weather"][0]["description"].ToString().Contains("rain");
+
+                            if (temp < 80 && !rain)
+                            {
+                                response = "the food trucks.";
+                            }
+                        }
+                    }
                 }
-                else
-                {
-                    response = RestaurantResponse(ctx.Guild.Name);
-                }
-            }
-            else
-            {
-                response = RestaurantResponse(ctx.Guild.Name);
             }
 
             await ctx.RespondAsync($"Go eat at {response}");
