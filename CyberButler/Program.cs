@@ -17,14 +17,7 @@ namespace CyberButler
 {
     class Program
     {
-
-
-        static void Main(string[] args)
-        {
-            MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult(); 
-        }
-
-        static async Task MainAsync(string[] args)
+        static async Task Main(string[] args)
         {
             DiscordClient discord;
             CommandsNextModule commands;
@@ -66,8 +59,6 @@ namespace CyberButler
             commands.RegisterCommands<MyCommands>();
             commands.RegisterCommands<Restaurant>();
 
-            //commands.RegisterCommands<SpotifyGroup>();
-            
             discord.MessageCreated += MessageCreated;
             discord.GuildMemberUpdated += DisplayNameChanged;
             discord.MessageReactionAdded += ReactionAdded;
