@@ -29,9 +29,7 @@ namespace CyberButler
             discord = new DiscordClient(new DiscordConfiguration
             {
                 Token = ConfigurationManager.AppSettings["DiscordToken"].ToString(),
-                TokenType = TokenType.Bot,
-                UseInternalLogHandler = true,
-                LogLevel = LogLevel.Debug
+                TokenType = TokenType.Bot
             });
 
             //Since this is running from Ubuntu Server using Mono, a different web socket is needed.
@@ -122,36 +120,43 @@ namespace CyberButler
         {
             await Task.CompletedTask;
         }
+
         private static async Task Commands_CommandErrored(CommandErrorEventArgs e)
         {
-            // let's log the error details
-            e.Context.Client.DebugLogger.LogMessage(
-                LogLevel.Error, 
-                "CyberButler", 
-                $"{e.Context.User.Username} tried executing '" +
-                $"{e.Command?.QualifiedName ?? "<unknown command>"}' " +
-                $"but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}." +
-                $"Stack trace:{e.Exception.StackTrace}"
-                , DateTime.Now);
+            await e.Context.Guild.GetChannel(458818596387291147).SendMessageAsync(
+                embed: new DiscordEmbedBuilder()
+                {
+                    Color = DiscordColor.Red,
+                    Description = $"{e.Context.User.Username} tried executing '" +
+                        $"{e.Command?.QualifiedName ?? "<unknown command>"}' " +
+                        $"but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}." +
+                        $"\nStack trace:\n```\n{e.Exception.StackTrace}\n```",
 
-            // let's check if the error is a result of lack
-            // of required permissions
+                });
+
+            // Lack of permissions
             if (e.Exception is ChecksFailedException ex)
             {
-                // yes, the user lacks required permissions, 
-                // let them know
-
                 var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
 
-                // let's wrap the response into an embed
                 var embed = new DiscordEmbedBuilder
                 {
                     Title = "Access denied",
                     Description = $"{emoji} You do not have the permissions required to execute this command.",
-                    Color = new DiscordColor(0xFF0000) // red
-                    // there are also some pre-defined colors available
-                    // as static members of the DiscordColor struct
+                    Color = DiscordColor.Red
                 };
+
+                await e.Context.RespondAsync("", embed: embed);
+            }
+            else
+            {
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = "Error",
+                    Description = $"{e.Exception.Message}",
+                    Color = DiscordColor.Red
+                };
+
                 await e.Context.RespondAsync("", embed: embed);
             }
         }
