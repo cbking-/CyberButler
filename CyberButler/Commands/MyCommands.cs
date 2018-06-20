@@ -33,7 +33,7 @@ namespace CyberButler.Commands
         [Command("eightball")]
         [Aliases("8ball")]
         [Description("Place important decisions in the hands of RNGesus")]
-        public async Task EightBall(CommandContext ctx, params String[] _question)
+        public async Task EightBall(CommandContext ctx, [RemainingText]String _question)
         {
             var responses = new List<String>
             {
@@ -61,7 +61,13 @@ namespace CyberButler.Commands
 
             var random = new Random();
 
-            await ctx.RespondAsync(responses[random.Next(responses.Count)]);
+            var embed = new DiscordEmbedBuilder
+            {
+                Title = _question,
+                Description = responses[random.Next(responses.Count)]
+            };
+
+            await ctx.RespondAsync(embed: embed);
         }
 
         [Command("source")]
