@@ -17,11 +17,11 @@ namespace CyberButler.Commands
         [Description("I'm gonna tell you where to eat but you probably won't listen.")]
         public async Task ExecuteGroupAsync(CommandContext ctx)
         {
-            string response = RestaurantResponse(ctx.Guild.Name); ;
+            var response = RestaurantResponse(ctx.Guild.Name);
 
             if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday)
             {
-                var openWeatherURL = $"https://api.openweathermap.org/data/2.5/weather?zip=45840&appid={ConfigurationManager.AppSettings["OpenWeatherMapKey"].ToString()}";
+                var openWeatherURL = $"https://api.openweathermap.org/data/2.5/weather?zip=45840&appid={ConfigurationManager.AppSettings["OpenWeatherMapKey"]}";
 
                 var request = (HttpWebRequest)WebRequest.Create(openWeatherURL);
 
@@ -47,14 +47,14 @@ namespace CyberButler.Commands
             await ctx.RespondAsync($"Go eat at {response}");
         }
 
-        private String RestaurantResponse(String _server)
+        String RestaurantResponse(String _server)
         {
             return new RestaurantRecord().SelectRandom(_server);
         }
 
         [Command("add")]
         [Description("!restaurant add \"New Restaurant\". It does not check for duplicates.")]
-        public async Task Add(CommandContext ctx, params String[] _restaurant)
+        public async Task Add(CommandContext ctx, [RemainingText]String _restaurant)
         {
             var record = new RestaurantRecord
             {

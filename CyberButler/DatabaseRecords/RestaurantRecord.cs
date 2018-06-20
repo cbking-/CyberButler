@@ -30,7 +30,7 @@ namespace CyberButler.DatabaseRecords
                 { "@server", _server }
             };
 
-            DataTable dt = db.Select(query, parameters);
+            var dt = db.Select(query, parameters);
             return dt.Rows[0]["restaurant"].ToString();
         }
     }

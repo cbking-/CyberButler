@@ -17,7 +17,7 @@ namespace CyberButler
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static async Task Main()
         {
             DiscordClient discord;
             CommandsNextModule commands;
@@ -28,7 +28,7 @@ namespace CyberButler
             //Create the Discord client
             discord = new DiscordClient(new DiscordConfiguration
             {
-                Token = ConfigurationManager.AppSettings["DiscordToken"].ToString(),
+                Token = ConfigurationManager.AppSettings["DiscordToken"],
                 TokenType = TokenType.Bot
             });
 
@@ -50,7 +50,7 @@ namespace CyberButler
             //Create the commands configuration using the prefix defined in the config file
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
-                StringPrefix = ConfigurationManager.AppSettings["CommandPrefix"].ToString()
+                StringPrefix = ConfigurationManager.AppSettings["CommandPrefix"]
             });
 
             commands.CommandErrored += Commands_CommandErrored;
@@ -66,7 +66,7 @@ namespace CyberButler
             await Task.Delay(-1);
         }
 
-        private static async Task MessageCreated(MessageCreateEventArgs e)
+        static async Task MessageCreated(MessageCreateEventArgs e)
         {
             var rgx = new Regex(@"touch(ing|ed)? base(s)?");
             var author = (DiscordMember)e.Author;
@@ -93,7 +93,7 @@ namespace CyberButler
             }
         }
 
-        private static async Task DisplayNameChanged(GuildMemberUpdateEventArgs e)
+        static async Task DisplayNameChanged(GuildMemberUpdateEventArgs e)
         {
             if (e.NicknameAfter != e.NicknameBefore)
             {
@@ -111,26 +111,26 @@ namespace CyberButler
             await Task.CompletedTask;
         }
 
-        private static async Task ReactionAdded(MessageReactionAddEventArgs e)
+        static async Task ReactionAdded(MessageReactionAddEventArgs e)
         {
             await Task.CompletedTask;
         }
 
-        private static async Task ReactionRemoved(MessageReactionRemoveEventArgs e)
+        static async Task ReactionRemoved(MessageReactionRemoveEventArgs e)
         {
             await Task.CompletedTask;
         }
 
-        private static async Task Commands_CommandErrored(CommandErrorEventArgs e)
+        static async Task Commands_CommandErrored(CommandErrorEventArgs e)
         {
             await e.Context.Guild.GetChannel(458818596387291147).SendMessageAsync(
-                embed: new DiscordEmbedBuilder()
+                embed: new DiscordEmbedBuilder
                 {
                     Color = DiscordColor.Red,
                     Description = $"{e.Context.User.Username} tried executing '" +
                         $"{e.Command?.QualifiedName ?? "<unknown command>"}' " +
                         $"but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}." +
-                        $"\nStack trace:\n```\n{e.Exception.StackTrace}\n```",
+                        $"\nStack trace:\n```\n{e.Exception.StackTrace}\n```"
 
                 });
 
@@ -159,12 +159,6 @@ namespace CyberButler
 
                 await e.Context.RespondAsync("", embed: embed);
             }
-        }
-
-        public async void ScheduleAction(Action action, DateTime ExecutionTime)
-        {
-            await Task.Delay((int)ExecutionTime.Subtract(DateTime.Now).TotalMilliseconds);
-            action();
         }
     }
 }

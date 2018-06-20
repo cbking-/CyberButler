@@ -75,12 +75,12 @@ namespace CyberButler.Commands
         [RequireOwner]
         [Description("Set the bot's game")]
         [Hidden]
-        public async Task SetStatus(CommandContext ctx, params String[] _game)
+        public async Task SetStatus(CommandContext ctx, [RemainingText]String _game)
         {
             await ctx.Client.UpdateStatusAsync(
-                new DiscordGame()
+                new DiscordGame
                 {
-                    Name = String.Join(" ", _game)
+                    Name = _game
                 }
             );
         }

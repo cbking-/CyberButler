@@ -9,8 +9,8 @@ namespace CyberButler
 {
     class DatabaseConnection
     {
-        private SQLiteConnection DbConnection;
-        private readonly string databasePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Database.sqlite3");
+        SQLiteConnection DbConnection;
+        readonly string databasePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Database.sqlite3");
 
         public DatabaseConnection()
         {
@@ -22,7 +22,7 @@ namespace CyberButler
             }
         }
 
-        private void SetupDatabase()
+        void SetupDatabase()
         {
             if (!File.Exists(databasePath))
             {
@@ -36,7 +36,7 @@ namespace CyberButler
 
                 DbConnection.Open();
 
-                SQLiteCommand command = new SQLiteCommand(createUsernameHistory, DbConnection);
+                var command = new SQLiteCommand(createUsernameHistory, DbConnection);
                 command.ExecuteNonQuery();
 
                 command = new SQLiteCommand(createRestaurant, DbConnection);
