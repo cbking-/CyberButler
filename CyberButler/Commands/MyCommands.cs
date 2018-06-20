@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 using System.Collections.Generic;
 
 namespace CyberButler.Commands
@@ -68,6 +69,20 @@ namespace CyberButler.Commands
         public async Task Source(CommandContext ctx)
         {
             await ctx.RespondAsync($"https://gitlab.com/corbinking/CyberButler");
+        }
+
+        [Command("setgame")]
+        [RequireOwner]
+        [Description("Set the bot's game")]
+        [Hidden]
+        public async Task SetStatus(CommandContext ctx, params String[] _game)
+        {
+            await ctx.Client.UpdateStatusAsync(
+                new DiscordGame()
+                {
+                    Name = String.Join(" ", _game)
+                }
+            );
         }
     }
 }
