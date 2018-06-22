@@ -50,7 +50,8 @@ namespace CyberButler
             //Create the commands configuration using the prefix defined in the config file
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
-                StringPrefix = ConfigurationManager.AppSettings["CommandPrefix"]
+                StringPrefix = ConfigurationManager.AppSettings["CommandPrefix"],
+                CaseSensitive = false                
             });
 
             commands.CommandErrored += Commands_CommandErrored;
