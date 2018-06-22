@@ -77,7 +77,6 @@ namespace CyberButler
                 try
                 {
                     var updated = command.ExecuteNonQuery();
-                    Console.Write(updated);
                 }
                 catch (Exception e)
                 {
