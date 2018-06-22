@@ -59,7 +59,7 @@ namespace CyberButler.Commands
             var record = new RestaurantRecord
             {
                 Server = ctx.Guild.Name,
-                Restaurant = String.Join(" ", _restaurant)
+                Restaurant = _restaurant
             };
 
             record.Insert();
