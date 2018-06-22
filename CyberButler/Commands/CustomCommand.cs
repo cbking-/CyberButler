@@ -18,8 +18,10 @@ namespace CyberButler.Commands
         public async Task Add(CommandContext _ctx, [Description("The command name")]String _command, [Description("The text to display")][RemainingText]String _text)
         {
             var record = new CommandRecord();
+            var existingCustom = record.SelectOne(_ctx.Guild.Name, _command);
+            var existingDelivered = _ctx.Client.GetCommandsNext().RegisteredCommands.ContainsKey(_command);
 
-            if (record.SelectOne(_ctx.Guild.Name, _command) != null && _ctx.Client.GetCommandsNext().RegisteredCommands[_command] == null )
+            if (existingCustom == "" && !existingDelivered)
             {
                 record.Server = _ctx.Guild.Name;
                 record.Command = _command;
@@ -63,7 +65,7 @@ namespace CyberButler.Commands
         {
             var record = new CommandRecord();
 
-            if (record.SelectOne(_ctx.Guild.Name, _command) != null)
+            if (record.SelectOne(_ctx.Guild.Name, _command) != "")
             {
                 await _ctx.RespondAsync($"Are you sure you want to update {_command}? (Yes/No)");
                 var interactivity = _ctx.Client.GetInteractivityModule();
@@ -92,7 +94,7 @@ namespace CyberButler.Commands
         {
             var record = new CommandRecord();
 
-            if (record.SelectOne(_ctx.Guild.Name, _command) != null)
+            if (record.SelectOne(_ctx.Guild.Name, _command) != "")
             {
                 await _ctx.RespondAsync($"Are you sure you want to delete {_command}? (Yes/No)");
                 var interactivity = _ctx.Client.GetInteractivityModule();
