@@ -31,25 +31,33 @@ namespace CyberButler
                 string createUsernameHistory = "create table username_history (server varchar, userid varchar, name_before varchar, name_after varchar)";
                 //string createReactionCount = "";
                 string createRestaurant = "create table restaurant (server varchar, restaurant varchar)";
+                string createCustomCommands = "create table custom_command (server varchar, command varchar, text varchar)";
 
                 DbConnection = new SQLiteConnection($"Data Source={databasePath};Version=3");
 
                 DbConnection.Open();
 
-                var command = new SQLiteCommand(createUsernameHistory, DbConnection);
-                command.ExecuteNonQuery();
+                using (var command = DbConnection.CreateCommand())
+                {
+                    command.CommandText = createUsernameHistory;
+                    command.ExecuteNonQuery();
 
-                command = new SQLiteCommand(createRestaurant, DbConnection);
-                command.ExecuteNonQuery();
+                    command.CommandText = createRestaurant;
+                    command.ExecuteNonQuery();
+
+                    command.CommandText = createCustomCommands;
+                    command.ExecuteNonQuery();
+                }
 
                 DbConnection.Close();
             }
         }
 
-        public void Insert(string _statement, Dictionary<String, String> _parameters = null)
+        public void NonQuery(string _statement, Dictionary<String, String> _parameters = null)
         {
             DbConnection.Open();
-            using (var command = new SQLiteCommand(_statement, DbConnection))
+
+            using (var command = DbConnection.CreateCommand())
             {
                 command.CommandType = CommandType.Text;
                 command.CommandText = _statement;
@@ -66,7 +74,15 @@ namespace CyberButler
                     }
                 }
 
-                command.ExecuteNonQuery();
+                try
+                {
+                    var updated = command.ExecuteNonQuery();
+                    Console.Write(updated);
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
             }
 
             DbConnection.Close();
@@ -78,7 +94,7 @@ namespace CyberButler
 
             DbConnection.Open();
 
-            using (var command = new SQLiteCommand(_statement, DbConnection))
+            using (var command = DbConnection.CreateCommand())
             {
                 command.CommandType = CommandType.Text;
                 command.CommandText = _statement;

@@ -88,7 +88,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\CustomCommand.cs" />
     <Compile Include="Commands\UsernameHistory.cs" />
+    <Compile Include="DatabaseRecords\CommandRecord.cs" />
     <Compile Include="DatabaseRecords\DatabaseConnection.cs" />
     <Compile Include="Commands\MyCommands.cs" />
     <Compile Include="DatabaseRecords\BaseRecord.cs" />

@@ -56,6 +56,7 @@ namespace CyberButler
             commands.CommandErrored += Commands_CommandErrored;
             commands.RegisterCommands<MyCommands>();
             commands.RegisterCommands<Restaurant>();
+            commands.RegisterCommands<CustomCommand>();
 
             discord.MessageCreated += MessageCreated;
             discord.GuildMemberUpdated += DisplayNameChanged;
@@ -123,19 +124,27 @@ namespace CyberButler
 
         static async Task Commands_CommandErrored(CommandErrorEventArgs e)
         {
-            await e.Context.Guild.GetChannel(458818596387291147).SendMessageAsync(
-                embed: new DiscordEmbedBuilder
+            if (e.Exception is CommandNotFoundException)
+            {
+                var text = new CommandRecord().SelectOne(e.Context.Guild.Name, e.Context.Message.Content.Substring(1));
+
+                if (text != "")
                 {
-                    Color = DiscordColor.Red,
-                    Description = $"{e.Context.User.Username} tried executing '" +
-                        $"{e.Command?.QualifiedName ?? "<unknown command>"}' " +
-                        $"but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}." +
-                        $"\nStack trace:\n```\n{e.Exception.StackTrace}\n```"
+                    await e.Context.RespondAsync(text);
+                }
+                else
+                {
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Title = "Error",
+                        Description = $"{e.Context.Message.Content.Split(' ')[0].Substring(1)} not found.",
+                        Color = DiscordColor.Red
+                    };
 
-                });
-
-            // Lack of permissions
-            if (e.Exception is ChecksFailedException ex)
+                    await e.Context.RespondAsync("", embed: embed);
+                }
+            }  
+            else if (e.Exception is ChecksFailedException ex)
             {
                 var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
 
