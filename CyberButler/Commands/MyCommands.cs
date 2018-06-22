@@ -77,6 +77,25 @@ namespace CyberButler.Commands
             await ctx.RespondAsync($"https://gitlab.com/corbinking/CyberButler");
         }
 
+        [Command("timetillwednesday")]
+        [Aliases("ttw")]
+        [Description("Time till the best day of the week.")]
+        public async Task TimeTillWednesday(CommandContext _ctx)
+        {
+            var today = DateTime.Now;
+            DateTime nextWednesday = GetNextWeekday(DateTime.Today, DayOfWeek.Wednesday);
+            TimeSpan diff = nextWednesday - today;
+
+            await _ctx.RespondAsync($"{diff.Days} Days, {diff.Hours} Hours, {diff.Minutes} Minutes, {diff.Seconds} Seconds");
+        }
+
+        public static DateTime GetNextWeekday(DateTime start, DayOfWeek day)
+        {
+            // The (... + 7) % 7 ensures we end up with a value in the range [0, 6]
+            int daysToAdd = ((int)day - (int)start.DayOfWeek + 7) % 7;
+            return start.AddDays(daysToAdd);
+        }
+
         [Command("setgame")]
         [RequireOwner]
         [Description("Set the bot's game")]
