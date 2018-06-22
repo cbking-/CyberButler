@@ -18,7 +18,7 @@ namespace CyberButler.DatabaseRecords
                 { "@restaurant", Restaurant }
             };
 
-            db.Insert(statement, parameters);
+            db.NonQuery(statement, parameters);
         }
 
         public String SelectRandom(string _server)

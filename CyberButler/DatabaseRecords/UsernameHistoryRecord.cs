@@ -15,7 +15,7 @@ namespace CyberButler.DatabaseRecords
 
         public override void Insert()
         {
-            db.Insert($"insert into username_history (server, userid, name_before, name_after) values ('{Server}', '{UserID}', '{NameBefore}', '{NameAfter}')");
+            db.NonQuery($"insert into username_history (server, userid, name_before, name_after) values ('{Server}', '{UserID}', '{NameBefore}', '{NameAfter}')");
         }
 
     }
