@@ -18,18 +18,19 @@ namespace CyberButler.Commands
         public async Task Add(CommandContext _ctx, [Description("The command name")]String _command, [Description("The text to display")][RemainingText]String _text)
         {
             var record = new CommandRecord();
-            var existingCustom = record.SelectOne(_ctx.Guild.Name, _command);
+            var server = _ctx.Guild.Id.ToString();
+            var existingCustom = record.SelectOne(server, _command);
             var existingDelivered = _ctx.Client.GetCommandsNext().RegisteredCommands.ContainsKey(_command);
-
+            
             if (existingCustom == "" && !existingDelivered)
             {
-                record.Server = _ctx.Guild.Name;
+                record.Server = server;
                 record.Command = _command;
                 record.Text = _text;
 
                 record.Insert();
 
-                await _ctx.RespondAsync($"Added \"{record.Command}\" to {record.Server} with the text \"{record.Text}\".");
+                await _ctx.RespondAsync($"Added \"{record.Command}\".");
             }
             else
             {
@@ -48,7 +49,8 @@ namespace CyberButler.Commands
                 Color = DiscordColor.Azure
             };
 
-            var results = new CommandRecord().SelectAll(_ctx.Guild.Name);
+            var server = _ctx.Guild.Id.ToString();
+            var results = new CommandRecord().SelectAll(server);
 
             foreach (var kvp in results)
             {
@@ -64,8 +66,9 @@ namespace CyberButler.Commands
         public async Task Modify(CommandContext _ctx, [Description("The command name")]String _command, [Description("Updated text")][RemainingText]String _text)
         {
             var record = new CommandRecord();
+            var server = _ctx.Guild.Id.ToString();
 
-            if (record.SelectOne(_ctx.Guild.Name, _command) != "")
+            if (record.SelectOne(server, _command) != "")
             {
                 await _ctx.RespondAsync($"Are you sure you want to update {_command}? (Yes/No)");
                 var interactivity = _ctx.Client.GetInteractivityModule();
@@ -73,7 +76,7 @@ namespace CyberButler.Commands
 
                 if (msg.Message.Content.ToLower() == "yes")
                 {
-                    record.Update(_ctx.Guild.Name, _command, _text);
+                    record.Update(server, _command, _text);
                     await _ctx.RespondAsync($"\"{_command}\" updated.");
                 }
                 else
@@ -93,8 +96,9 @@ namespace CyberButler.Commands
         public async Task Delete(CommandContext _ctx, [Description("The command name to delete")]String _command)
         {
             var record = new CommandRecord();
+            var server = _ctx.Guild.Id.ToString();
 
-            if (record.SelectOne(_ctx.Guild.Name, _command) != "")
+            if (record.SelectOne(server, _command) != "")
             {
                 await _ctx.RespondAsync($"Are you sure you want to delete {_command}? (Yes/No)");
                 var interactivity = _ctx.Client.GetInteractivityModule();
@@ -102,7 +106,7 @@ namespace CyberButler.Commands
 
                 if (msg.Message.Content.ToLower() == "yes")
                 {
-                    record.Delete(_ctx.Guild.Name, _command);
+                    record.Delete(server, _command);
                     await _ctx.RespondAsync($"\"{_command}\" deleted.");
                 }
                 else

@@ -36,7 +36,7 @@ namespace CyberButler.DatabaseRecords
             db.NonQuery(statement, parameters);
         }
 
-        public String SelectOne(string _server, string _command)
+        public String SelectOne(String _server, String _command)
         {
             var query = $"select text from custom_command where server = @server and command = @command";
 
@@ -61,7 +61,7 @@ namespace CyberButler.DatabaseRecords
             return result;
         }
 
-        public Dictionary<String, String> SelectAll(string _server)
+        public Dictionary<String, String> SelectAll(String _server)
         {
             var query = $"select command, text from custom_command where server = @server";
 

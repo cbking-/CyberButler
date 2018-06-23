@@ -15,9 +15,10 @@ namespace CyberButler.Commands
     public class Restaurant
     {
         [Description("I'm gonna tell you where to eat but you probably won't listen.")]
-        public async Task ExecuteGroupAsync(CommandContext ctx)
+        public async Task ExecuteGroupAsync(CommandContext _ctx)
         {
-            var response = RestaurantResponse(ctx.Guild.Name);
+            var server = _ctx.Guild.Id.ToString();
+            var response = RestaurantResponse(server);
 
             if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday)
             {
@@ -44,7 +45,7 @@ namespace CyberButler.Commands
                 }
             }
 
-            await ctx.RespondAsync($"Go eat at {response}");
+            await _ctx.RespondAsync($"Go eat at {response}");
         }
 
         String RestaurantResponse(String _server)
@@ -54,17 +55,18 @@ namespace CyberButler.Commands
 
         [Command("add")]
         [Description("!restaurant add \"New Restaurant\". It does not check for duplicates.")]
-        public async Task Add(CommandContext ctx, [RemainingText]String _restaurant)
+        public async Task Add(CommandContext _ctx, [RemainingText]String _restaurant)
         {
+            var server = _ctx.Guild.Id.ToString();
             var record = new RestaurantRecord
             {
-                Server = ctx.Guild.Name,
+                Server = server,
                 Restaurant = _restaurant
             };
 
             record.Insert();
 
-            await ctx.RespondAsync($"Added \"{record.Restaurant}\" to {record.Server}.");
+            await _ctx.RespondAsync($"Added \"{record.Restaurant}\".");
         }
     }
 }

@@ -101,7 +101,7 @@ namespace CyberButler
             {
                 var record = new UsernameHistoryRecord
                 {
-                    Server = e.Guild.Name,
+                    Server = e.Guild.Id.ToString(),
                     UserID = e.Member.Username + '#' + e.Member.Discriminator,
                     NameBefore = e.NicknameBefore,
                     NameAfter = e.NicknameAfter
@@ -127,8 +127,11 @@ namespace CyberButler
         {
             if (e.Exception is CommandNotFoundException)
             {
-                var text = new CommandRecord().SelectOne(e.Context.Guild.Name, e.Context.Message.Content.Substring(1));
+                var command = e.Context.Message.Content.Substring(1);
+                var server = e.Context.Guild.Id.ToString();
 
+                var text = new CommandRecord().SelectOne(server, command);
+                
                 if (text != "")
                 {
                     await e.Context.RespondAsync(text);
