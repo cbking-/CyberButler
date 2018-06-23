@@ -61,11 +61,10 @@ namespace CyberButler.Commands
 
             var random = new Random();
 
-            var embed = new DiscordEmbedBuilder
-            {
-                Title = _question,
-                Description = responses[random.Next(responses.Count)]
-            };
+            var embed = new DiscordEmbedBuilder();
+            embed.WithThumbnailUrl(@"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/8_ball_icon.svg/240px-8_ball_icon.svg.png");
+            embed.AddField("Question:", _question, true);
+            embed.AddField("CyberButler Says:", responses[random.Next(responses.Count)], true);
 
             await ctx.RespondAsync(embed: embed);
         }
