@@ -28,7 +28,7 @@ namespace CyberButler
             {
                 SQLiteConnection.CreateFile(databasePath);
 
-                string createUsernameHistory = "create table username_history (server varchar, userid varchar, name_before varchar, name_after varchar)";
+                string createUsernameHistory = "create table username_history (server varchar, userid varchar, name_before varchar, name_after varchar, insert_datetime string)";
                 //string createReactionCount = "";
                 string createRestaurant = "create table restaurant (server varchar, restaurant varchar)";
                 string createCustomCommands = "create table custom_command (server varchar, command varchar, text varchar)";

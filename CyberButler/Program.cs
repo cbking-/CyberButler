@@ -58,6 +58,7 @@ namespace CyberButler
             commands.RegisterCommands<MyCommands>();
             commands.RegisterCommands<Restaurant>();
             commands.RegisterCommands<CustomCommand>();
+            commands.RegisterCommands<UsernameHistory>();
 
             discord.MessageCreated += MessageCreated;
             discord.GuildMemberUpdated += DisplayNameChanged;
@@ -102,9 +103,10 @@ namespace CyberButler
                 var record = new UsernameHistoryRecord
                 {
                     Server = e.Guild.Id.ToString(),
-                    UserID = e.Member.Username + '#' + e.Member.Discriminator,
+                    UserID = e.Member.Id.ToString(),
                     NameBefore = e.NicknameBefore,
-                    NameAfter = e.NicknameAfter
+                    NameAfter = e.NicknameAfter,
+                    InsertDateTime = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss")
                 };
 
                 record.Insert();
