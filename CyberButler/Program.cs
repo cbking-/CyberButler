@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Net.WebSocket;
+using Newtonsoft.Json;
 
 namespace CyberButler
 {
@@ -71,13 +73,37 @@ namespace CyberButler
 
         static async Task MessageCreated(MessageCreateEventArgs e)
         {
-            var rgx = new Regex(@"touch(ing|ed)? base(s)?");
+            var touchBase = new Regex(@"touch(ing|ed)? base(s)?");
+            var ripAndTear = new Regex(@"rip and tear");
+
             var author = (DiscordMember)e.Author;
             var client = (DiscordClient)e.Client;
 
-            if (rgx.IsMatch(e.Message.Content.ToLower()))
+            if (touchBase.IsMatch(e.Message.Content.ToLower()))
             {
                 await e.Message.RespondAsync(":right_facing_fist: :left_facing_fist: :right_facing_fist: :left_facing_fist:");
+            }
+
+            if (ripAndTear.IsMatch(e.Message.Content.ToLower()))
+            {
+                var giphyURL = $"https://api.giphy.com/v1/gifs/random?";
+                giphyURL += $"api_key={ConfigurationManager.AppSettings["GiphyAPIKey"]}";
+                giphyURL += $"&limit=1";
+                giphyURL += $"&tag=doomguy";
+
+                var request = (HttpWebRequest)WebRequest.Create(giphyURL);
+
+                using (HttpWebResponse webResponse = (HttpWebResponse)await request.GetResponseAsync())
+                {
+                    using (var stream = webResponse.GetResponseStream())
+                    {
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var result = JsonConvert.DeserializeObject<dynamic>(await reader.ReadToEndAsync());
+                            await e.Message.RespondAsync(result.data["url"].ToString());
+                        }
+                    }
+                }
             }
 
             if (e.Message.ToString().ToLower().Contains("donger") && !author.IsBot)
