@@ -63,8 +63,8 @@ namespace CyberButler.Commands
 
             var embed = new DiscordEmbedBuilder();
             embed.WithThumbnailUrl(@"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/8_ball_icon.svg/240px-8_ball_icon.svg.png");
-            embed.AddField("Question:", _question, true);
-            embed.AddField("CyberButler Says:", responses[random.Next(responses.Count)], true);
+            embed.AddField("Question:", _question);
+            embed.AddField("CyberButler Says:", responses[random.Next(responses.Count)]);
 
             await ctx.RespondAsync(embed: embed);
         }
