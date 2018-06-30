@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 
 namespace CyberButler.DatabaseRecords
 {
@@ -27,7 +26,7 @@ namespace CyberButler.DatabaseRecords
             db.NonQuery(statement, parameters);
         }
 
-        public Dictionary<String, String> Select(String _server, String _userid)
+        public IEnumerable<UsernameHistoryRecord> Select(String _server, String _userid)
         {
             var query = $"select name_before, name_after from username_history where server = @server and userid = @userid order by insert_datetime desc";
 
@@ -37,23 +36,13 @@ namespace CyberButler.DatabaseRecords
                 { "@userid", _userid }
             };
 
-            var dt = db.Select(query, parameters);
+            var dt = db.Select<UsernameHistoryRecord>(query, parameters);
 
             var result = new Dictionary<String, String>();
 
-            try
-            {
-                foreach (DataRow row in dt.Rows)
-                {
-                    result.Add(row["name_before"].ToString(), row["name_after"].ToString());
-                }
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            var records = db.Select<UsernameHistoryRecord>(query, parameters);
 
-            return result;
+            return records;
         }
 
     }

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
+using System.Linq;
 
 namespace CyberButler.DatabaseRecords
 {
@@ -36,7 +36,7 @@ namespace CyberButler.DatabaseRecords
             db.NonQuery(statement, parameters);
         }
 
-        public String SelectOne(String _server, String _command)
+        public CommandRecord SelectOne(String _server, String _command)
         {
             var query = $"select text from custom_command where server = @server and command = @command";
 
@@ -46,22 +46,22 @@ namespace CyberButler.DatabaseRecords
                 { "@command", _command}
             };
 
-            var dt = db.Select(query, parameters);
-
-            var result = "";
+            var records = db.Select<CommandRecord>(query, parameters);
+            CommandRecord result = null;
 
             try
             {
-                result = dt.Rows[0]["text"].ToString();
+                result = records.Cast<CommandRecord>().First();
             }
             catch
             {
+                //no record to return
             }
-            
+
             return result;
         }
 
-        public Dictionary<String, String> SelectAll(String _server)
+        public IEnumerable<CommandRecord> SelectAll(String _server)
         {
             var query = $"select command, text from custom_command where server = @server";
 
@@ -70,22 +70,9 @@ namespace CyberButler.DatabaseRecords
                 { "@server", _server }
             };
 
-            var dt = db.Select(query, parameters);
+            var records = db.Select<CommandRecord>(query, parameters);
 
-            var result = new Dictionary<String, String>();
-
-            try
-            {
-                foreach (DataRow row in dt.Rows)
-                {
-                    result.Add(row["command"].ToString(), row["text"].ToString());
-                }
-            }
-            catch
-            {
-            }
-
-            return result;
+            return records;
         }
 
         public void Delete(String _server, String _command)

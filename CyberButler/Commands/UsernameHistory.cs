@@ -25,9 +25,9 @@ namespace CyberButler.Commands
             var server = _ctx.Guild.Id.ToString();
             var results = new UsernameHistoryRecord().Select(server, _userId.Id.ToString());
 
-            foreach (var kvp in results)
+            foreach (var record in results)
             {
-                embed.Description += $"{kvp.Key}\n";
+                embed.Description += $"{record.NameBefore}\n";
             }
 
             await _ctx.RespondAsync("", embed: embed);

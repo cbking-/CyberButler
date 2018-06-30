@@ -22,7 +22,7 @@ namespace CyberButler.Commands
             var existingCustom = record.SelectOne(server, _command);
             var existingDelivered = _ctx.Client.GetCommandsNext().RegisteredCommands.ContainsKey(_command);
             
-            if (existingCustom == "" && !existingDelivered)
+            if (existingCustom == null && !existingDelivered)
             {
                 record.Server = server;
                 record.Command = _command;
@@ -52,9 +52,9 @@ namespace CyberButler.Commands
             var server = _ctx.Guild.Id.ToString();
             var results = new CommandRecord().SelectAll(server);
 
-            foreach (var kvp in results)
+            foreach (var record in results)
             {
-                embed.AddField(kvp.Key, kvp.Value.Length <= 1024 ? kvp.Value : kvp.Value.Substring(0, 1024));
+                embed.AddField(record.Command, record.Text.Length <= 1024 ? record.Text : record.Text.Substring(0, 1024));
             }
 
             await _ctx.RespondAsync("", embed: embed);
@@ -68,7 +68,7 @@ namespace CyberButler.Commands
             var record = new CommandRecord();
             var server = _ctx.Guild.Id.ToString();
 
-            if (record.SelectOne(server, _command) != "")
+            if (record.SelectOne(server, _command) != null)
             {
                 await _ctx.RespondAsync($"Are you sure you want to update {_command}? (Yes/No)");
                 var interactivity = _ctx.Client.GetInteractivityModule();
@@ -98,7 +98,7 @@ namespace CyberButler.Commands
             var record = new CommandRecord();
             var server = _ctx.Guild.Id.ToString();
 
-            if (record.SelectOne(server, _command) != "")
+            if (record.SelectOne(server, _command) != null)
             {
                 await _ctx.RespondAsync($"Are you sure you want to delete {_command}? (Yes/No)");
                 var interactivity = _ctx.Client.GetInteractivityModule();

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -12,30 +11,28 @@ using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
-using DSharpPlus.Net.WebSocket;
 using Newtonsoft.Json;
 
 namespace CyberButler
 {
     class Program
     {
-        static async Task Main()
+        static void Main(string[] args)
+        {
+            MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+
+        static async Task MainAsync(string[] args)
         {
             DiscordClient discord;
             CommandsNextModule commands;
 
-            //Since this is running from Ubuntu Server using Mono, this line is a SSL certificate validation override.
-            ServicePointManager.ServerCertificateValidationCallback = (s, cert, chain, ssl) => true;
-
             //Create the Discord client
             discord = new DiscordClient(new DiscordConfiguration
             {
-                Token = ConfigurationManager.AppSettings["DiscordToken"],
+                Token = Configuration.Config["DiscordToken"],
                 TokenType = TokenType.Bot
             });
-
-            //Since this is running from Ubuntu Server using Mono, a different web socket is needed.
-            discord.SetWebSocketClient<WebSocketSharpClient>();
 
             discord.UseInteractivity(new InteractivityConfiguration
             {
@@ -52,8 +49,8 @@ namespace CyberButler
             //Create the commands configuration using the prefix defined in the config file
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
-                StringPrefix = ConfigurationManager.AppSettings["CommandPrefix"],
-                CaseSensitive = false                
+                StringPrefix = Configuration.Config["CommandPrefix"],
+                CaseSensitive = Boolean.Parse(Configuration.Config["CommandCaseSensitive"])
             });
 
             commands.CommandErrored += Commands_CommandErrored;
@@ -87,7 +84,7 @@ namespace CyberButler
             if (ripAndTear.IsMatch(e.Message.Content.ToLower()))
             {
                 var giphyURL = $"https://api.giphy.com/v1/gifs/random?";
-                giphyURL += $"api_key={ConfigurationManager.AppSettings["GiphyAPIKey"]}";
+                giphyURL += $"api_key={Configuration.Config["GiphyAPIKey"]}";
                 giphyURL += $"&limit=1";
                 giphyURL += $"&tag=doomguy";
 
@@ -158,11 +155,11 @@ namespace CyberButler
                 var command = e.Context.Message.Content.Substring(1);
                 var server = e.Context.Guild.Id.ToString();
 
-                var text = new CommandRecord().SelectOne(server, command);
+                var record = new CommandRecord().SelectOne(server, command);
                 
-                if (text != "")
+                if (record != null)
                 {
-                    await e.Context.RespondAsync(text);
+                    await e.Context.RespondAsync(record.Text);
                 }
                 else
                 {
@@ -197,7 +194,7 @@ namespace CyberButler
                     Description = $"{e.Exception.Message}",
                     Color = DiscordColor.Red
                 };
-
+                
                 await e.Context.RespondAsync("", embed: embed);
             }
         }

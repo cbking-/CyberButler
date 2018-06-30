@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
+using System.Linq;
 
 namespace CyberButler.DatabaseRecords
 {
@@ -21,7 +21,7 @@ namespace CyberButler.DatabaseRecords
             db.NonQuery(statement, parameters);
         }
 
-        public String SelectRandom(string _server)
+        public RestaurantRecord SelectRandom(string _server)
         {
             var query = $"select restaurant from restaurant where server = @server order by random() limit 1";
 
@@ -30,8 +30,11 @@ namespace CyberButler.DatabaseRecords
                 { "@server", _server }
             };
 
-            var dt = db.Select(query, parameters);
-            return dt.Rows[0]["restaurant"].ToString();
+            var records = db.Select<RestaurantRecord>(query, parameters);
+
+            var result = records.Cast<RestaurantRecord>().First();
+
+            return result;
         }
     }
 }

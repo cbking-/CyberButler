@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SQLite;
+using Microsoft.Data.Sqlite;
 using System.IO;
 using System.Reflection;
 
-namespace CyberButler
+
+namespace CyberButler.DatabaseRecords
 {
     class DatabaseConnection
     {
-        SQLiteConnection DbConnection;
+        SqliteConnectionStringBuilder ConString;
+        SqliteConnection DbConnection;
         readonly string databasePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Database.sqlite3");
 
         public DatabaseConnection()
@@ -18,7 +20,13 @@ namespace CyberButler
 
             if (DbConnection == null)
             {
-                DbConnection = new SQLiteConnection($"Data Source={databasePath};Version=3");
+                ConString = new SqliteConnectionStringBuilder
+                {
+                    DataSource = databasePath,
+                    Mode = SqliteOpenMode.ReadWriteCreate
+                };
+
+                DbConnection = new SqliteConnection(ConString.ConnectionString);
             }
         }
 
@@ -26,14 +34,18 @@ namespace CyberButler
         {
             if (!File.Exists(databasePath))
             {
-                SQLiteConnection.CreateFile(databasePath);
-
                 string createUsernameHistory = "create table username_history (server varchar, userid varchar, name_before varchar, name_after varchar, insert_datetime string)";
                 //string createReactionCount = "";
                 string createRestaurant = "create table restaurant (server varchar, restaurant varchar)";
                 string createCustomCommands = "create table custom_command (server varchar, command varchar, text varchar)";
 
-                DbConnection = new SQLiteConnection($"Data Source={databasePath};Version=3");
+                ConString = new SqliteConnectionStringBuilder
+                {
+                    DataSource = databasePath,
+                    Mode = SqliteOpenMode.ReadWriteCreate
+                };
+
+                DbConnection = new SqliteConnection(ConString.ConnectionString);
 
                 DbConnection.Open();
 
@@ -87,10 +99,8 @@ namespace CyberButler
             DbConnection.Close();
         }
 
-        public DataTable Select(string _statement, Dictionary<String, String> _parameters = null)
+        public IEnumerable<T> Select<T>(string _statement, Dictionary<String, String> _parameters = null) where T : class, new()
         {
-            var result = new DataTable();
-
             DbConnection.Open();
 
             using (var command = DbConnection.CreateCommand())
@@ -110,13 +120,30 @@ namespace CyberButler
                     }
                 }
 
-                using (var adapter = new SQLiteDataAdapter(command))
+                var reader = command.ExecuteReader();
+
+                while (reader.Read())
                 {
-                    adapter.Fill(result);
+                    T obj = new T();
+
+                    foreach (var prop in obj.GetType().GetProperties())
+                    {
+                        try
+                        {
+                            PropertyInfo propertyInfo = obj.GetType().GetProperty(prop.Name);
+                            propertyInfo.SetValue(obj, Convert.ChangeType(reader[prop.Name.ToLower()], propertyInfo.PropertyType), null);
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+                    }
+
+                    yield return obj;
                 }
             }
+
             DbConnection.Close();
-            return result;
         }
     }
 }

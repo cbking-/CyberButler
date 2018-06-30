@@ -3,7 +3,6 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Newtonsoft.Json;
 using System;
-using System.Configuration;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
@@ -22,7 +21,7 @@ namespace CyberButler.Commands
 
             if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday)
             {
-                var openWeatherURL = $"https://api.openweathermap.org/data/2.5/weather?zip=45840&appid={ConfigurationManager.AppSettings["OpenWeatherMapKey"]}";
+                var openWeatherURL = $"https://api.openweathermap.org/data/2.5/weather?zip=45840&appid={Configuration.Config["OpenWeatherMapKey"]}";
 
                 var request = (HttpWebRequest)WebRequest.Create(openWeatherURL);
 
@@ -50,7 +49,7 @@ namespace CyberButler.Commands
 
         String RestaurantResponse(String _server)
         {
-            return new RestaurantRecord().SelectRandom(_server);
+            return new RestaurantRecord().SelectRandom(_server).Restaurant;
         }
 
         [Command("add")]
