@@ -1,0 +1,15 @@
+version: 1.0.{build}
+image: Visual Studio 2017
+configuration: Release
+before_build:
+- cmd: nuget restore
+build:
+  verbosity: quiet
+after_build:
+- cmd: dotnet publish -c Release
+artifacts:
+- path: CyberButler\bin\Release\netcoreapp2.0\publish\
+  name: Publish
+deploy:
+- provider: Environment
+  name: Vultr
