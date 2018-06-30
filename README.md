@@ -1,5 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/u2gf3ank3l2ahq9r?svg=true)](https://ci.appveyor.com/project/cbking-/cyberbutler)
-
+[![Build status](https://ci.appveyor.com/api/projects/status/7uk4tv78tgsiwyqj?svg=true)](https://ci.appveyor.com/project/cbking-/cyberbutler)
 
 # CyberButler
 CyberButler Discord Bot
