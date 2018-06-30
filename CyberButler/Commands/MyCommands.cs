@@ -85,7 +85,16 @@ namespace CyberButler.Commands
             DateTime nextWednesday = GetNextWeekday(DateTime.Today, DayOfWeek.Wednesday);
             TimeSpan diff = nextWednesday - today;
 
-            await _ctx.RespondAsync($"{diff.Days} Days, {diff.Hours} Hours, {diff.Minutes} Minutes, {diff.Seconds} Seconds");
+            if (diff.Ticks < 0)
+            {
+                var emoji = DiscordEmoji.FromName(_ctx.Client, ":wednesday:");
+
+                await _ctx.RespondAsync($"{emoji} It is Wednesday, my dudes. {emoji}");
+            }
+            else
+            {
+                await _ctx.RespondAsync($"{diff.Days} Days, {diff.Hours} Hours, {diff.Minutes} Minutes, {diff.Seconds} Seconds");
+            }
         }
 
         public static DateTime GetNextWeekday(DateTime start, DayOfWeek day)
