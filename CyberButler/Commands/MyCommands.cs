@@ -73,7 +73,7 @@ namespace CyberButler.Commands
         [Description("Source code remote repository.")]
         public async Task Source(CommandContext ctx)
         {
-            await ctx.RespondAsync($"https://gitlab.com/corbinking/CyberButler");
+            await ctx.RespondAsync($"https://github.com/cbking-/CyberButler");
         }
 
         [Command("timetillwednesday")]
