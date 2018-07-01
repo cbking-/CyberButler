@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 
 namespace CyberButler.Commands
 {
-    [Group("usernamehistory", CanInvokeWithoutSubcommand = false)]
-    [Aliases("uh")]
-    class UsernameHistory
+    [Group("usernamehistory", CanInvokeWithoutSubcommand = false),
+        Aliases("uh")]
+    internal class UsernameHistory
     {
-        [Command("get")]
-        [Aliases("list", "read")]
-        [Description("Example: !usernamehistory get @UserName")]
-        public async Task Get(CommandContext _ctx, DiscordMember _userId)
+        [Command("get"),
+            Aliases("list", "read"),
+            Description("Example: !usernamehistory get @UserName")]
+        public async Task Get(CommandContext _ctx, 
+            [Description("@ the user you want to see the history for")]DiscordMember _userId)
         {
             var embed = new DiscordEmbedBuilder
             {

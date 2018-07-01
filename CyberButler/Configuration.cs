@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System.IO;
+
 namespace CyberButler
 {
-    class Configuration
+    internal class Configuration
     {
         public static IConfigurationRoot Config { get; private set; }
 

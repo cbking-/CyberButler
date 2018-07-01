@@ -4,14 +4,18 @@ using System.Linq;
 
 namespace CyberButler.DatabaseRecords
 {
-    class RestaurantRecord : BaseRecord
+    internal class RestaurantRecord : BaseRecord
     {
         public string Server { get; set; }
         public string Restaurant { get; set; }
 
         public override void Insert()
         {
-            var statement = $"insert into restaurant (server, restaurant) values (@server, @restaurant)";
+            var statement = @"INSERT INTO restaurant
+                                          (server,
+                                           restaurant)
+                              VALUES      (@server,
+                                           @restaurant)";
             var parameters = new Dictionary<String, String>
             {
                 { "@server", Server },
@@ -23,7 +27,11 @@ namespace CyberButler.DatabaseRecords
 
         public RestaurantRecord SelectRandom(string _server)
         {
-            var query = $"select restaurant from restaurant where server = @server order by random() limit 1";
+            var query = @"SELECT restaurant
+                          FROM   restaurant
+                          WHERE  server = @server
+                          ORDER  BY Random()
+                          LIMIT  1";
 
             var parameters = new Dictionary<String, String>
             {

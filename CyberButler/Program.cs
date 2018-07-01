@@ -1,9 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Net;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using CyberButler.Commands;
+﻿using CyberButler.Commands;
 using CyberButler.DatabaseRecords;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -12,17 +7,22 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using Newtonsoft.Json;
+using System;
+using System.IO;
+using System.Net;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace CyberButler
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
-        static async Task MainAsync(string[] args)
+        private static async Task MainAsync(string[] args)
         {
             DiscordClient discord;
             CommandsNextModule commands;
@@ -68,7 +68,7 @@ namespace CyberButler
             await Task.Delay(-1);
         }
 
-        static async Task MessageCreated(MessageCreateEventArgs e)
+        private static async Task MessageCreated(MessageCreateEventArgs e)
         {
             var touchBase = new Regex(@"touch(ing|ed)? base(s)?");
             var ripAndTear = new Regex(@"rip and tear");
@@ -119,7 +119,7 @@ namespace CyberButler
             }
         }
 
-        static async Task DisplayNameChanged(GuildMemberUpdateEventArgs e)
+        private static async Task DisplayNameChanged(GuildMemberUpdateEventArgs e)
         {
             if (e.NicknameAfter != e.NicknameBefore)
             {
@@ -138,17 +138,17 @@ namespace CyberButler
             await Task.CompletedTask;
         }
 
-        static async Task ReactionAdded(MessageReactionAddEventArgs e)
+        private static async Task ReactionAdded(MessageReactionAddEventArgs e)
         {
             await Task.CompletedTask;
         }
 
-        static async Task ReactionRemoved(MessageReactionRemoveEventArgs e)
+        private static async Task ReactionRemoved(MessageReactionRemoveEventArgs e)
         {
             await Task.CompletedTask;
         }
 
-        static async Task Commands_CommandErrored(CommandErrorEventArgs e)
+        private static async Task Commands_CommandErrored(CommandErrorEventArgs e)
         {
             if (e.Exception is CommandNotFoundException)
             {
@@ -161,7 +161,7 @@ namespace CyberButler
                 }
 
                 var record = new CommandRecord().SelectOne(server, command);
-                
+
                 if (record != null)
                 {
                     await e.Context.RespondAsync(record.Text);
@@ -177,7 +177,7 @@ namespace CyberButler
 
                     await e.Context.RespondAsync("", embed: embed);
                 }
-            }  
+            }
             else if (e.Exception is ChecksFailedException ex)
             {
                 var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
@@ -199,7 +199,7 @@ namespace CyberButler
                     Description = $"{e.Exception.Message}",
                     Color = DiscordColor.Red
                 };
-                
+
                 await e.Context.RespondAsync("", embed: embed);
             }
         }

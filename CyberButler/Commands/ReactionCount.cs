@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CyberButler.Commands
+﻿namespace CyberButler.Commands
 {
-    class ReactionCount
+    internal class ReactionCount
     {
     }
 }

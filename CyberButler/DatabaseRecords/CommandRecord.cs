@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace CyberButler.DatabaseRecords
 {
-    class CommandRecord : BaseRecord
+    internal class CommandRecord : BaseRecord
     {
         private readonly bool CaseSensitive = Boolean.Parse(Configuration.Config["CommandCaseSensitive"]);
 
@@ -19,7 +19,14 @@ namespace CyberButler.DatabaseRecords
                 Command = Command.ToLower();
             }
 
-            var statement = $"insert into custom_command (server, command, text) values (@server, @command, @text)";
+            var statement = @"INSERT INTO custom_command
+                                          (server,
+                                           command,
+                                           text)
+                              VALUES      (@server,
+                                           @command,
+                                           @text)";
+
             var parameters = new Dictionary<String, String>
             {
                 { "@server", Server },
@@ -37,7 +44,11 @@ namespace CyberButler.DatabaseRecords
                 _command = _command.ToLower();
             }
 
-            var statement = $"update custom_command set text = @text where server = @server and command = @command";
+            var statement = @"UPDATE custom_command
+                              SET text = @text
+                              WHERE server = @server
+                                    AND command = @command  ";
+
             var parameters = new Dictionary<String, String>
             {
                 { "@server", _server },
@@ -55,7 +66,10 @@ namespace CyberButler.DatabaseRecords
                 _command = _command.ToLower();
             }
 
-            var query = $"select text from custom_command where server = @server and command = @command";
+            var query = @"SELECT text
+                          FROM custom_command
+                          WHERE server = @server
+                               AND command = @command  ";
 
             var parameters = new Dictionary<String, String>
             {
@@ -80,7 +94,10 @@ namespace CyberButler.DatabaseRecords
 
         public IEnumerable<CommandRecord> SelectAll(String _server)
         {
-            var query = $"select command, text from custom_command where server = @server";
+            var query = @"SELECT command,
+                                  text
+                          FROM   custom_command
+                          WHERE  server = @server";
 
             var parameters = new Dictionary<String, String>
             {
@@ -99,7 +116,9 @@ namespace CyberButler.DatabaseRecords
                 _command = _command.ToLower();
             }
 
-            var statement = $"delete from custom_command where server = @server and command = @command";
+            var statement = @"DELETE FROM custom_command
+                              WHERE server = @server
+                                   AND command = @command  ";
             var parameters = new Dictionary<String, String>
             {
                 { "@server", _server },

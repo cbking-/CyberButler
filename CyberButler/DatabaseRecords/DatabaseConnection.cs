@@ -1,18 +1,20 @@
-﻿using System;
+﻿using Microsoft.Data.Sqlite;
+using System;
 using System.Collections.Generic;
 using System.Data;
-using Microsoft.Data.Sqlite;
 using System.IO;
 using System.Reflection;
 
-
 namespace CyberButler.DatabaseRecords
 {
-    class DatabaseConnection
+    internal class DatabaseConnection
     {
-        SqliteConnectionStringBuilder ConString;
-        SqliteConnection DbConnection;
-        readonly string databasePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Database.sqlite3");
+        private SqliteConnectionStringBuilder ConString;
+        private SqliteConnection DbConnection;
+        private readonly string databasePath = 
+            Path.Combine(
+                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                "Database.sqlite3");
 
         public DatabaseConnection()
         {
@@ -30,14 +32,31 @@ namespace CyberButler.DatabaseRecords
             }
         }
 
-        void SetupDatabase()
+        private void SetupDatabase()
         {
             if (!File.Exists(databasePath))
             {
-                string createUsernameHistory = "create table username_history (server varchar, userid varchar, name_before varchar, name_after varchar, insert_datetime string)";
-                //string createReactionCount = "";
-                string createRestaurant = "create table restaurant (server varchar, restaurant varchar)";
-                string createCustomCommands = "create table custom_command (server varchar, command varchar, text varchar)";
+                string createTables = @"CREATE TABLE username_history
+                                          (
+                                             server          VARCHAR,
+                                             userid          VARCHAR,
+                                             name_before     VARCHAR,
+                                             name_after      VARCHAR,
+                                             insert_datetime VARCHAR
+                                          );
+
+                                        CREATE TABLE restaurant
+                                          (
+                                             server     VARCHAR,
+                                             restaurant VARCHAR
+                                          );
+
+                                        CREATE TABLE custom_command
+                                          (
+                                             server  VARCHAR,
+                                             command VARCHAR,
+                                             text    VARCHAR
+                                          );";
 
                 ConString = new SqliteConnectionStringBuilder
                 {
@@ -51,13 +70,7 @@ namespace CyberButler.DatabaseRecords
 
                 using (var command = DbConnection.CreateCommand())
                 {
-                    command.CommandText = createUsernameHistory;
-                    command.ExecuteNonQuery();
-
-                    command.CommandText = createRestaurant;
-                    command.ExecuteNonQuery();
-
-                    command.CommandText = createCustomCommands;
+                    command.CommandText = createTables;
                     command.ExecuteNonQuery();
                 }
 
@@ -99,7 +112,8 @@ namespace CyberButler.DatabaseRecords
             DbConnection.Close();
         }
 
-        public IEnumerable<T> Select<T>(string _statement, Dictionary<String, String> _parameters = null) where T : class, new()
+        public IEnumerable<T> Select<T>(string _statement, 
+            Dictionary<String, String> _parameters = null) where T : class, new()
         {
             DbConnection.Open();
 
@@ -131,7 +145,10 @@ namespace CyberButler.DatabaseRecords
                         try
                         {
                             PropertyInfo propertyInfo = obj.GetType().GetProperty(prop.Name);
-                            propertyInfo.SetValue(obj, Convert.ChangeType(reader[prop.Name.ToLower()], propertyInfo.PropertyType), null);
+                            propertyInfo.SetValue(obj, 
+                                Convert.ChangeType(reader[prop.Name.ToLower()], 
+                                propertyInfo.PropertyType), 
+                                null);
                         }
                         catch
                         {

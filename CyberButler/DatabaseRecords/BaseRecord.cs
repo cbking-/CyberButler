@@ -1,6 +1,6 @@
 ﻿namespace CyberButler.DatabaseRecords
 {
-    abstract class BaseRecord
+    internal abstract class BaseRecord
     {
         protected DatabaseConnection db = new DatabaseConnection();
 
