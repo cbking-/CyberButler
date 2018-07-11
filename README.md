@@ -3,6 +3,6 @@
 # CyberButler
 CyberButler Discord Bot
 
-Built with .NET Core.
+Built with [DSharpPlus](https://github.com/DSharpPlus/DSharpPlus) and .NET Core.
 
 SQLite used as the database.
