@@ -58,12 +58,12 @@ namespace CyberButler
             commands.RegisterCommands<Restaurant>();
             commands.RegisterCommands<CustomCommand>();
             commands.RegisterCommands<UsernameHistory>();
+            commands.RegisterCommands<RainbowGroup>();
 
             discord.MessageCreated += MessageCreated;
             discord.GuildMemberUpdated += DisplayNameChanged;
             discord.MessageReactionAdded += ReactionAdded;
             discord.MessageReactionRemoved += ReactionRemoved;
-
             await discord.ConnectAsync();
             await Task.Delay(-1);
         }
