@@ -14,11 +14,13 @@ namespace CyberButler
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            FileSystemWatcher watcher = new FileSystemWatcher();
-            watcher.Path = Directory.GetCurrentDirectory();
-            watcher.NotifyFilter = NotifyFilters.LastWrite;
-            watcher.Filter = "appsettings.json";
-            
+            FileSystemWatcher watcher = new FileSystemWatcher
+            {
+                Path = Directory.GetCurrentDirectory(),
+                NotifyFilter = NotifyFilters.LastWrite,
+                Filter = "appsettings.json"
+            };
+
             watcher.Changed += new FileSystemEventHandler(OnChanged);
             watcher.EnableRaisingEvents = true;
         }
