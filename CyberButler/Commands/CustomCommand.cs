@@ -44,22 +44,38 @@ namespace CyberButler.Commands
             Description("Example: !customcommand get")]
         public async Task Get(CommandContext _ctx)
         {
+            var server = _ctx.Guild.Id.ToString();
+            var results = new CommandRecord().SelectAll(server);
+
             var embed = new DiscordEmbedBuilder
             {
                 Title = $"{_ctx.Guild.Name} Custom Commands",
                 Color = DiscordColor.Azure
             };
 
-            var server = _ctx.Guild.Id.ToString();
-            var results = new CommandRecord().SelectAll(server);
-
             foreach (var record in results)
             {
-                embed.AddField(record.Command, 
-                    record.Text.Length <= 1024 ? record.Text : record.Text.Substring(0, 1024));
+                if (embed.Fields.Count < 25)
+                {
+                    embed.AddField(record.Command,
+                        record.Text.Length <= 1024 ? record.Text : record.Text.Substring(0, 1024));
+                }
+                else
+                {
+                    await _ctx.RespondAsync("", embed: embed);
+
+                    embed = new DiscordEmbedBuilder
+                    {
+                        Title = $"{_ctx.Guild.Name} Custom Commands",
+                        Color = DiscordColor.Azure
+                    };
+                }
             }
 
-            await _ctx.RespondAsync("", embed: embed);
+            if (embed.Fields.Count > 0)
+            {
+                await _ctx.RespondAsync("", embed: embed);
+            }
         }
 
         [Command("modify"), 
