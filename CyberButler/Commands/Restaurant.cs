@@ -4,6 +4,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using Newtonsoft.Json;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -68,6 +69,32 @@ namespace CyberButler.Commands
             record.Insert();
 
             await _ctx.RespondAsync($"Added \"{record.Restaurant}\".");
+        }
+
+        [Command("view"),
+            Aliases("get"),
+            Description("List the possible restaurants and odds to pick")]
+        public async Task View(CommandContext _ctx)
+        {
+            var response = "";
+            var server = _ctx.Guild.Id.ToString();
+            var results = new RestaurantRecord().SelectAll(server);
+
+            await _ctx.TriggerTypingAsync();
+
+            var records = results.GroupBy(r => r.Restaurant)
+                  .Select(n => new
+                  {
+                      n.Key,
+                      Percent = ((decimal)n.Select(r => r.Restaurant).Distinct().Count() / results.Count()) * 100
+                  });
+
+            foreach(var record in records)
+            {
+                response += $"{record.Key} - {record.Percent}%\n";
+            }
+
+            await _ctx.RespondAsync(response);
         }
     }
 }

@@ -44,5 +44,21 @@ namespace CyberButler.DatabaseRecords
 
             return result;
         }
+
+        public IEnumerable<RestaurantRecord> SelectAll(String _server)
+        {
+            var query = @"SELECT restaurant
+                          FROM   restaurant
+                          WHERE  server = @server";
+
+            var parameters = new Dictionary<String, String>
+            {
+                { "@server", _server }
+            };
+
+            var records = db.Select<RestaurantRecord>(query, parameters);
+
+            return records;
+        }
     }
 }
