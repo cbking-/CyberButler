@@ -9,6 +9,7 @@ using DSharpPlus.Interactivity;
 using Newtonsoft.Json;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -72,10 +73,11 @@ namespace CyberButler
         {
             var touchBase = new Regex(@"touch(ing|ed)? base(s)?");
             var ripAndTear = new Regex(@"rip and tear");
+            var niche = new Regex(@"(n i c h e|niche)");
 
             var author = (DiscordMember)e.Author;
             var client = (DiscordClient)e.Client;
-
+            
             if (touchBase.IsMatch(e.Message.Content.ToLower()))
             {
                 await e.Message.RespondAsync(":right_facing_fist: :left_facing_fist: :right_facing_fist: :left_facing_fist:");
@@ -101,6 +103,11 @@ namespace CyberButler
                         }
                     }
                 }
+            }
+
+            if (niche.IsMatch(e.Message.Content.ToLower()))
+            {
+                await e.Message.RespondAsync("【﻿ＮＩＣＨＥ】");
             }
 
             if (e.Message.ToString().ToLower().Contains("donger") && !author.IsBot)
@@ -140,6 +147,46 @@ namespace CyberButler
 
         private static async Task ReactionAdded(MessageReactionAddEventArgs e)
         {
+            var theWayReact = e.Message.Reactions.FirstOrDefault(react => react.Emoji.Name == "theway");
+            var notTheWayReact = e.Message.Reactions.FirstOrDefault(react => react.Emoji.Name == "nottheway");
+
+            if (theWayReact != null && theWayReact.Count > 3)
+            {
+                var random = new Random();
+                var theWay = DiscordEmoji.FromName((DiscordClient)e.Client, ":theway:");
+                var click  = DiscordEmoji.FromName((DiscordClient)e.Client, ":click:");
+
+                string[] responses = {$"{theWay}{theWay}{theWay} THIS IS THE WAY {theWay}{theWay}{theWay}",
+                                 $"{click}{click}{click}{click}{click}{click}{click}{click}{click}" };
+
+                for(var i = 0; i < 30; i++)
+                {
+                    await e.Message.RespondAsync(responses[random.Next(2)]);
+                    await Task.Delay(1000);
+                }
+            }
+
+            if (notTheWayReact != null && notTheWayReact.Count > 3)
+            {
+                var random = new Random();
+                var notTheWay = DiscordEmoji.FromName((DiscordClient)e.Client, ":nottheway:");
+                var spit = DiscordEmoji.FromName((DiscordClient)e.Client, ":sweat_drops:");
+
+                string[] responses = {$"{notTheWay}{notTheWay}{notTheWay} THIS IS NOT THE WAY " +
+                                        $"{notTheWay}{notTheWay}{notTheWay}",
+                                      $"{notTheWay}{notTheWay}{notTheWay} SPIT ON THE FALSE QUEEN" +
+                                        $"{notTheWay}{notTheWay}{notTheWay}",
+                                      $"{notTheWay}{spit}{notTheWay}{spit}{notTheWay}{spit}{notTheWay}{spit}" +
+                                      $"{notTheWay}{spit}{notTheWay}{spit}{notTheWay}{spit}{notTheWay}{spit}" +
+                                      $"{notTheWay}{spit}{notTheWay}{spit}{notTheWay}{spit}{notTheWay}{spit}"};
+
+                for (var i = 0; i < 30; i++)
+                {
+                    await e.Message.RespondAsync(responses[random.Next(3)]);
+                    await Task.Delay(1000);
+                }
+            }
+
             await Task.CompletedTask;
         }
 
