@@ -86,12 +86,12 @@ namespace CyberButler.Commands
                   .Select(n => new
                   {
                       n.Key,
-                      Percent = ((decimal)n.Select(r => r.Restaurant).Distinct().Count() / results.Count()) * 100
+                      Count = n.Select(r => r.Restaurant).Count()
                   });
 
-            foreach(var record in records)
+            foreach(var record in records.OrderByDescending(r => r.Count))
             {
-                response += $"{record.Key} - {record.Percent}%\n";
+                response += $"{record.Key} - {Math.Round((double)record.Count / results.Count(),4) * 100}%\n";
             }
 
             await _ctx.RespondAsync(response);
