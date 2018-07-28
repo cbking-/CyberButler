@@ -14,7 +14,7 @@ namespace CyberButler.DatabaseRecords
 
         public override void Insert()
         {
-            if (CaseSensitive)
+            if (!CaseSensitive)
             {
                 Command = Command.ToLower();
             }
@@ -39,7 +39,7 @@ namespace CyberButler.DatabaseRecords
 
         public void Update(String _server, String _command, String _text)
         {
-            if (CaseSensitive)
+            if (!CaseSensitive)
             {
                 _command = _command.ToLower();
             }
@@ -61,7 +61,7 @@ namespace CyberButler.DatabaseRecords
 
         public CommandRecord SelectOne(String _server, String _command)
         {
-            if (CaseSensitive)
+            if (!CaseSensitive)
             {
                 _command = _command.ToLower();
             }
@@ -111,7 +111,7 @@ namespace CyberButler.DatabaseRecords
 
         public void Delete(String _server, String _command)
         {
-            if (CaseSensitive)
+            if (!CaseSensitive)
             {
                 _command = _command.ToLower();
             }

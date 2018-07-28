@@ -202,7 +202,7 @@ namespace CyberButler
                 var command = e.Context.Message.Content.Substring(1);
                 var server = e.Context.Guild.Id.ToString();
 
-                if (Boolean.Parse(Configuration.Config["CommandCaseSensitive"]))
+                if (!Boolean.Parse(Configuration.Config["CommandCaseSensitive"]))
                 {
                     command = command.ToLower();
                 }
