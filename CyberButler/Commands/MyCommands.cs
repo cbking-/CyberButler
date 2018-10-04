@@ -214,11 +214,12 @@ namespace CyberButler.Commands
 
             if (ret == "")
             {
-                request = (HttpWebRequest)WebRequest.Create(url);
-                request.Headers["Authorization"] = "Bearer " + Configuration.Config["YelpAPIKey"];
+                query["limit"] = "1";
                 query["offset"] = pick.ToString();
                 uriBuilder.Query = query.ToString();
                 url = uriBuilder.ToString();
+                request = (HttpWebRequest)WebRequest.Create(url);
+                request.Headers["Authorization"] = "Bearer " + Configuration.Config["YelpAPIKey"];
 
                 using (HttpWebResponse webResponse = (HttpWebResponse)await request.GetResponseAsync())
                 {
