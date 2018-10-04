@@ -204,7 +204,7 @@ namespace CyberButler.Commands
                         var total = (int)result["total"];
                         pick = new Random().Next(total);
 
-                        if (pick < 50)
+                        if (pick < result["businesses"].Count)
                         {
                             ret = result["businesses"][pick]["name"];
                         }
