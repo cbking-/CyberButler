@@ -4,6 +4,11 @@ using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using System.IO;
+using System.Net;
+using System.Web;
+using DSharpPlus.Interactivity;
 
 namespace CyberButler.Commands
 {
@@ -126,6 +131,110 @@ namespace CyberButler.Commands
                     Name = _game
                 }
             );
+        }
+
+        [Command("restaurant")]
+        [Aliases("foodlibrary")]
+        [Description("I'm gonna tell you where to eat but you probably won't listen.")]
+        public async Task Restaurant(CommandContext _ctx, int zipcode)
+        {
+            var server = _ctx.Guild.Id.ToString();
+            var response = RestaurantResponse(server, _ctx, zipcode).Result;
+
+            if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday && DateTime.Now.Month >= 6 && DateTime.Now.Month <= 9)
+            {
+                var openWeatherURL = $"https://api.openweathermap.org/data/2.5/weather?zip=45840&appid=";
+                openWeatherURL += Configuration.Config["OpenWeatherMapKey"];
+
+                var request = (HttpWebRequest)WebRequest.Create(openWeatherURL);
+
+                using (HttpWebResponse webResponse = (HttpWebResponse)await request.GetResponseAsync())
+                {
+                    using (var stream = webResponse.GetResponseStream())
+                    {
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var result = JsonConvert.DeserializeObject<dynamic>(await reader.ReadToEndAsync());
+                            var temp = result["main"]["temp"] * (9 / 5) - 459.67;
+                            var rain = result["weather"][0]["description"].ToString().Contains("rain");
+
+                            if (temp < 80 && !rain)
+                            {
+                                response = "the food trucks.";
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (response != "")
+            {
+                await _ctx.RespondAsync($"Go eat at {response}");
+            }
+        }
+
+        private async Task<string> RestaurantResponse(string _server, CommandContext _ctx, int zipcode)
+        {
+            if (zipcode > 99999)
+            {
+                await _ctx.RespondAsync($"Enter a zipcode you dummy");
+                return "";
+            }
+
+            var url = Configuration.Config["YelpAPIRoot"] + "/businesses/search";
+            var uriBuilder = new UriBuilder(url);
+            var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+            query["location"] = zipcode.ToString();
+            query["categories"] = "restaurants";
+            uriBuilder.Query = query.ToString();
+            url = uriBuilder.ToString();
+
+            var request = (HttpWebRequest)WebRequest.Create(url);
+            request.Headers["Authorization"] = "Bearer " + Configuration.Config["YelpAPIKey"];
+            var ret = "";
+            var pick = 0;
+
+            using (HttpWebResponse webResponse = (HttpWebResponse)await request.GetResponseAsync())
+            {
+                using (var stream = webResponse.GetResponseStream())
+                {
+                    using (var reader = new StreamReader(stream))
+                    {
+                        var result = JsonConvert.DeserializeObject<dynamic>(await reader.ReadToEndAsync());
+                        var total = (int)result["total"];
+                        pick = new Random().Next(total);
+
+                        if (pick < 50)
+                        {
+                            ret = result["businesses"][pick]["name"];
+                        }
+                    }
+                }
+            }
+
+            if (ret == "")
+            {
+                request = (HttpWebRequest)WebRequest.Create(url);
+                request.Headers["Authorization"] = "Bearer " + Configuration.Config["YelpAPIKey"];
+                query["offset"] = pick.ToString();
+                uriBuilder.Query = query.ToString();
+                url = uriBuilder.ToString();
+
+                using (HttpWebResponse webResponse = (HttpWebResponse)await request.GetResponseAsync())
+                {
+                    using (var stream = webResponse.GetResponseStream())
+                    {
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var result = JsonConvert.DeserializeObject<dynamic>(await reader.ReadToEndAsync());
+
+                            ret = result["businesses"][0]["name"];
+                        }
+                    }
+                }
+            }
+
+            return ret;
         }
     }
 }

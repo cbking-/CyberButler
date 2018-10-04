@@ -56,7 +56,6 @@ namespace CyberButler
 
             commands.CommandErrored += Commands_CommandErrored;
             commands.RegisterCommands<MyCommands>();
-            commands.RegisterCommands<Restaurant>();
             commands.RegisterCommands<CustomCommand>();
             commands.RegisterCommands<UsernameHistory>();
             commands.RegisterCommands<RainbowGroup>();
