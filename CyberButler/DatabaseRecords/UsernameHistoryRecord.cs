@@ -16,8 +16,8 @@ namespace CyberButler.DatabaseRecords
             var statement = @"INSERT INTO username_history
                                           (server,
                                            userid,
-                                           name_before,
-                                           name_after,
+                                           namebefore,
+                                           nameafter,
                                            insert_datetime)
                               VALUES      (@server,
                                            @userid,
@@ -39,8 +39,8 @@ namespace CyberButler.DatabaseRecords
 
         public IEnumerable<UsernameHistoryRecord> Select(String _server, String _userid)
         {
-            var query = @"SELECT name_before,
-                                 name_after
+            var query = @"SELECT namebefore,
+                                 nameafter
                           FROM   username_history
                           WHERE  server = @server
                                  AND userid = @userid
@@ -51,11 +51,7 @@ namespace CyberButler.DatabaseRecords
                 { "@server", _server },
                 { "@userid", _userid }
             };
-
-            var dt = db.Select<UsernameHistoryRecord>(query, parameters);
-
-            var result = new Dictionary<String, String>();
-
+            
             var records = db.Select<UsernameHistoryRecord>(query, parameters);
 
             return records;

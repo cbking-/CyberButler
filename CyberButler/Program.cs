@@ -114,10 +114,10 @@ namespace CyberButler
                 await e.Message.RespondAsync($"ヽ༼ຈل͜ຈ༽ﾉ raise your dongers ヽ༼ຈل͜ຈ༽ﾉ");
             }
 
-            if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday)
-            {
-                await e.Message.CreateReactionAsync(DiscordEmoji.FromName(client, ":wednesday:"));
-            }
+            //if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday)
+            //{
+            //    await e.Message.CreateReactionAsync(DiscordEmoji.FromName(client, ":wednesday:"));
+            //}
 
             if (author.Nickname.ToLower().Contains("goat"))
             {
