@@ -13,17 +13,16 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
 namespace CyberButler
 {
     internal class Program
     {
         private static void Main(string[] args)
         {
-            MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
+            StartDiscord(args).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
-        private static async Task MainAsync(string[] args)
+        private static async Task StartDiscord(string[] args)
         {
             DiscordClient discord;
             CommandsNextModule commands;
@@ -66,6 +65,7 @@ namespace CyberButler
             discord.MessageReactionRemoved += ReactionRemoved;
             await discord.ConnectAsync();
             await Task.Delay(-1);
+
         }
 
         private static async Task MessageCreated(MessageCreateEventArgs e)
@@ -76,7 +76,7 @@ namespace CyberButler
 
             var author = (DiscordMember)e.Author;
             var client = (DiscordClient)e.Client;
-            
+
             if (touchBase.IsMatch(e.Message.Content.ToLower()))
             {
                 await e.Message.RespondAsync(":right_facing_fist: :left_facing_fist: :right_facing_fist: :left_facing_fist:");
@@ -153,12 +153,12 @@ namespace CyberButler
             {
                 var random = new Random();
                 var theWay = DiscordEmoji.FromName((DiscordClient)e.Client, ":theway:");
-                var click  = DiscordEmoji.FromName((DiscordClient)e.Client, ":click:");
+                var click = DiscordEmoji.FromName((DiscordClient)e.Client, ":click:");
 
                 string[] responses = {$"{theWay}{theWay}{theWay} THIS IS THE WAY {theWay}{theWay}{theWay}",
                                  $"{click}{click}{click}{click}{click}{click}{click}{click}{click}" };
 
-                for(var i = 0; i < 30; i++)
+                for (var i = 0; i < 30; i++)
                 {
                     await e.Message.RespondAsync(responses[random.Next(2)]);
                     await Task.Delay(1000);

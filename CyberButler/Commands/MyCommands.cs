@@ -8,7 +8,6 @@ using Newtonsoft.Json;
 using System.IO;
 using System.Net;
 using System.Web;
-using DSharpPlus.Interactivity;
 
 namespace CyberButler.Commands
 {
@@ -31,8 +30,8 @@ namespace CyberButler.Commands
             await ctx.RespondAsync($"You have been entered to win.");
         }
 
-        [Command("ratemywaifu")]
-        [Description("Find out how crappy your waifu is.")]
+        [Command("ratemywaifu"),
+            Description("Find out how crappy your waifu is.")]
         public async Task RateMyWaifu(CommandContext ctx)
         {
             var response = $"Anime was a mistake and she will never love you back. ";
@@ -136,10 +135,10 @@ namespace CyberButler.Commands
         [Command("restaurant")]
         [Aliases("foodlibrary")]
         [Description("I'm gonna tell you where to eat but you probably won't listen.")]
-        public async Task Restaurant(CommandContext _ctx, int zipcode)
+        public async Task Restaurant(CommandContext _ctx, [RemainingText]string location)
         {
             var server = _ctx.Guild.Id.ToString();
-            var response = RestaurantResponse(server, _ctx, zipcode).Result;
+            var embed = RestaurantResponse(server, _ctx, location).Result;
 
             if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday && DateTime.Now.Month >= 6 && DateTime.Now.Month <= 9)
             {
@@ -160,39 +159,36 @@ namespace CyberButler.Commands
 
                             if (temp < 80 && !rain)
                             {
-                                response = "the food trucks.";
+                                embed = new DiscordEmbedBuilder
+                                {
+                                    Title = "Food Trucks",
+                                    Color = DiscordColor.Blurple,
+                                    Description = "Go eat at the food trucks."
+                                };
                             }
                         }
                     }
                 }
             }
 
-            if (response != "")
-            {
-                await _ctx.RespondAsync($"Go eat at {response}");
-            }
+            await _ctx.RespondAsync(embed: embed);
         }
 
-        private async Task<string> RestaurantResponse(string _server, CommandContext _ctx, int zipcode)
+        private async Task<DiscordEmbedBuilder> RestaurantResponse(string _server, CommandContext _ctx, string location)
         {
-            if (zipcode > 99999)
-            {
-                await _ctx.RespondAsync($"Enter a zipcode you dummy");
-                return "";
-            }
+            var pick = 0;
+            var embed = new DiscordEmbedBuilder();
 
             var url = Configuration.Config["YelpAPIRoot"] + "/businesses/search";
             var uriBuilder = new UriBuilder(url);
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
-            query["location"] = zipcode.ToString();
+            query["location"] = location;
             query["categories"] = "restaurants";
             uriBuilder.Query = query.ToString();
             url = uriBuilder.ToString();
 
             var request = (HttpWebRequest)WebRequest.Create(url);
             request.Headers["Authorization"] = "Bearer " + Configuration.Config["YelpAPIKey"];
-            var ret = "";
-            var pick = 0;
 
             using (HttpWebResponse webResponse = (HttpWebResponse)await request.GetResponseAsync())
             {
@@ -201,18 +197,17 @@ namespace CyberButler.Commands
                     using (var reader = new StreamReader(stream))
                     {
                         var result = JsonConvert.DeserializeObject<dynamic>(await reader.ReadToEndAsync());
-                        var total = (int)result["total"];
-                        pick = new Random().Next(total);
+                        pick = new Random().Next((int)result["total"]);
 
                         if (pick < result["businesses"].Count)
                         {
-                            ret = result["businesses"][pick]["name"];
+                            embed = BuildEmbed(result["businesses"][pick]);
                         }
                     }
                 }
             }
 
-            if (ret == "")
+            if (embed.Title == null)
             {
                 query["limit"] = "1";
                 query["offset"] = pick.ToString();
@@ -229,13 +224,43 @@ namespace CyberButler.Commands
                         {
                             var result = JsonConvert.DeserializeObject<dynamic>(await reader.ReadToEndAsync());
 
-                            ret = result["businesses"][0]["name"];
+                            embed = BuildEmbed(result["businesses"][0]);
                         }
                     }
                 }
             }
 
-            return ret;
+            return embed;
+        }
+
+        private DiscordEmbedBuilder BuildEmbed(dynamic _business)
+        {
+            var categories = new List<string>();
+            var rating = (string)_business["rating"];
+            var reviews = (string)_business["review_count"];
+            var price = (string)_business["price"] ?? "N/A";
+            var address = String.Join("\n",_business["location"]["display_address"].ToObject<string[]>());
+            var mapUrl = $"https://www.google.com/maps/search/?api=1&query={WebUtility.UrlEncode(address)}";
+
+            foreach (var category in _business["categories"])
+            {
+                categories.Add((string)category["title"]);
+            }
+
+            var embed = new DiscordEmbedBuilder
+            {
+                Title = (string)_business["name"],
+                Color = DiscordColor.Blurple,
+                Url = (string)_business["url"],
+                Description = String.Join(", ", categories),
+                ThumbnailUrl = "http://icons.iconarchive.com/icons/webalys/kameleon.pics/512/Food-Dome-icon.png",
+            };
+
+            embed.AddField("Rating (Reviews)", $"{rating} ({reviews})", true);
+            embed.AddField("Price", price, true);
+            embed.AddField("Address", $"[{address}]({mapUrl})");
+
+            return embed;
         }
     }
 }
