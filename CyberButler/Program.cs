@@ -112,7 +112,7 @@ namespace CyberButler
 
             if (cloud.IsMatch(e.Message.Content.ToLower()))
             {
-                await e.Message.RespondAsync("ＣＬＯＵＤ");
+                await e.Message.RespondAsync(":cloud: ＣＬＯＵＤ :cloud:");
             }
 
             if (e.Message.ToString().ToLower().Contains("donger") && !author.IsBot)
