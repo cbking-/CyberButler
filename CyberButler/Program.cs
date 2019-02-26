@@ -73,6 +73,7 @@ namespace CyberButler
             var touchBase = new Regex(@"touch(ing|ed)? base(s)?");
             var ripAndTear = new Regex(@"rip and tear");
             var niche = new Regex(@"(n i c h e|niche)");
+            var cloud = new Regex(@"(c l o u d|cloud)");
 
             var author = (DiscordMember)e.Author;
             var client = (DiscordClient)e.Client;
@@ -107,6 +108,11 @@ namespace CyberButler
             if (niche.IsMatch(e.Message.Content.ToLower()))
             {
                 await e.Message.RespondAsync("【﻿ＮＩＣＨＥ】");
+            }
+
+            if (cloud.IsMatch(e.Message.Content.ToLower()))
+            {
+                await e.Message.RespondAsync("ＣＬＯＵＤ");
             }
 
             if (e.Message.ToString().ToLower().Contains("donger") && !author.IsBot)
