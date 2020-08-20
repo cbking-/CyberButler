@@ -1,5 +1,5 @@
 ﻿using CyberButler.Commands;
-using CyberButler.DatabaseRecords;
+using CyberButler.EntityContext;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
@@ -27,6 +27,9 @@ namespace CyberButler
             DiscordClient discord;
             CommandsNextModule commands;
 
+            using var db = new CyberButlerContext();
+            db.Database.EnsureCreated();
+
             //Create the Discord client
             discord = new DiscordClient(new DiscordConfiguration
             {
@@ -50,7 +53,7 @@ namespace CyberButler
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
                 StringPrefix = Configuration.Config["CommandPrefix"],
-                CaseSensitive = Boolean.Parse(Configuration.Config["CommandCaseSensitive"])
+                CaseSensitive = bool.Parse(Configuration.Config["CommandCaseSensitive"])
             });
 
             commands.CommandErrored += Commands_CommandErrored;
@@ -91,17 +94,11 @@ namespace CyberButler
 
                 var request = (HttpWebRequest)WebRequest.Create(giphyURL);
 
-                using (HttpWebResponse webResponse = (HttpWebResponse)await request.GetResponseAsync())
-                {
-                    using (var stream = webResponse.GetResponseStream())
-                    {
-                        using (var reader = new StreamReader(stream))
-                        {
-                            var result = JsonConvert.DeserializeObject<dynamic>(await reader.ReadToEndAsync());
-                            await e.Message.RespondAsync(result.data["url"].ToString());
-                        }
-                    }
-                }
+                using HttpWebResponse webResponse = (HttpWebResponse)await request.GetResponseAsync();
+                using var stream = webResponse.GetResponseStream();
+                using var reader = new StreamReader(stream);
+                var result = JsonConvert.DeserializeObject<dynamic>(await reader.ReadToEndAsync());
+                await e.Message.RespondAsync(result.data["url"].ToString());
             }
 
             if (niche.IsMatch(e.Message.Content.ToLower()))
@@ -119,7 +116,7 @@ namespace CyberButler
             //    await e.Message.CreateReactionAsync(DiscordEmoji.FromName(client, ":wednesday:"));
             //}
 
-            if (author.Nickname.ToLower().Contains("goat"))
+            if (author.DisplayName.ToLower().Contains("goat"))
             {
                 await e.Message.CreateReactionAsync(DiscordEmoji.FromName(client, ":goat:"));
             }
@@ -129,16 +126,18 @@ namespace CyberButler
         {
             if (e.NicknameAfter != e.NicknameBefore)
             {
-                var record = new UsernameHistoryRecord
+                using var db = new CyberButlerContext();
+                
+                db.Add(new Entities.UsernameHistory()
                 {
                     Server = e.Guild.Id.ToString(),
                     UserID = e.Member.Id.ToString(),
                     NameBefore = e.NicknameBefore,
                     NameAfter = e.NicknameAfter,
                     InsertDateTime = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss")
-                };
+                });
 
-                record.Insert();
+                await db.SaveChangesAsync();
             }
 
             await Task.CompletedTask;
@@ -201,16 +200,21 @@ namespace CyberButler
                 var command = e.Context.Message.Content.Substring(1);
                 var server = e.Context.Guild.Id.ToString();
 
-                if (!Boolean.Parse(Configuration.Config["CommandCaseSensitive"]))
+                using var db = new CyberButlerContext();
+                var result = new Entities.CustomCommand();
+
+                if (bool.Parse(Configuration.Config["CommandCaseSensitive"]))
                 {
-                    command = command.ToLower();
+                    result = db.CustomCommand.Where(_ => _.Server == server && _.Command == command).FirstOrDefault();
                 }
-
-                var record = new CommandRecord().SelectOne(server, command);
-
-                if (record != null)
+                else
                 {
-                    await e.Context.RespondAsync(record.Text);
+                    result = db.CustomCommand.Where(_ => _.Server.ToLower() == server.ToLower() && _.Command.ToLower() == command.ToLower()).FirstOrDefault();
+                }
+                
+                if (result != null)
+                {
+                    await e.Context.RespondAsync(result.Text);
                 }
                 else
                 {

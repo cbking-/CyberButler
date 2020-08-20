@@ -1,7 +1,8 @@
-﻿using CyberButler.DatabaseRecords;
+﻿using CyberButler.EntityContext;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CyberButler.Commands
@@ -24,7 +25,9 @@ namespace CyberButler.Commands
             };
 
             var server = _ctx.Guild.Id.ToString();
-            var results = new UsernameHistoryRecord().Select(server, _userId.Id.ToString());
+
+            using var db = new CyberButlerContext();
+            var results = db.UsernameHistory.Where(_ => _.Server == server && _.UserID == _userId.Id.ToString());
 
             foreach (var record in results)
             {

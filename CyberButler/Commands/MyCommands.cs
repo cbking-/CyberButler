@@ -43,9 +43,9 @@ namespace CyberButler.Commands
         [Aliases("8ball")]
         [Description("Place important decisions in the hands of RNGesus")]
         public async Task EightBall(CommandContext ctx, 
-            [Description("Question you want CyberButler to answer."), RemainingText]String _question)
+            [Description("Question you want CyberButler to answer."), RemainingText] string _question)
         {
-            var responses = new List<String>
+            var responses = new List<string>
             {
                 "It is certain",
                 "It is decidedly so",
@@ -122,7 +122,7 @@ namespace CyberButler.Commands
             Description("Set the bot's game"),
             Hidden]
         public async Task SetStatus(CommandContext ctx,
-            [Description("Game to be set."), RemainingText]String _game)
+            [Description("Game to be set."), RemainingText] string _game)
         {
             await ctx.Client.UpdateStatusAsync(
                 new DiscordGame
@@ -147,27 +147,21 @@ namespace CyberButler.Commands
 
                 var request = (HttpWebRequest)WebRequest.Create(openWeatherURL);
 
-                using (HttpWebResponse webResponse = (HttpWebResponse)await request.GetResponseAsync())
-                {
-                    using (var stream = webResponse.GetResponseStream())
-                    {
-                        using (var reader = new StreamReader(stream))
-                        {
-                            var result = JsonConvert.DeserializeObject<dynamic>(await reader.ReadToEndAsync());
-                            var temp = result["main"]["temp"] * (9 / 5) - 459.67;
-                            var rain = result["weather"][0]["description"].ToString().Contains("rain");
+                using HttpWebResponse webResponse = (HttpWebResponse)await request.GetResponseAsync();
+                using var stream = webResponse.GetResponseStream();
+                using var reader = new StreamReader(stream);
+                var result = JsonConvert.DeserializeObject<dynamic>(await reader.ReadToEndAsync());
+                var temp = result["main"]["temp"] * (9 / 5) - 459.67;
+                var rain = result["weather"][0]["description"].ToString().Contains("rain");
 
-                            if (temp < 80 && !rain)
-                            {
-                                embed = new DiscordEmbedBuilder
-                                {
-                                    Title = "Food Trucks",
-                                    Color = DiscordColor.Blurple,
-                                    Description = "Go eat at the food trucks."
-                                };
-                            }
-                        }
-                    }
+                if (temp < 80 && !rain)
+                {
+                    embed = new DiscordEmbedBuilder
+                    {
+                        Title = "Food Trucks",
+                        Color = DiscordColor.Blurple,
+                        Description = "Go eat at the food trucks."
+                    };
                 }
             }
 
@@ -192,18 +186,14 @@ namespace CyberButler.Commands
 
             using (HttpWebResponse webResponse = (HttpWebResponse)await request.GetResponseAsync())
             {
-                using (var stream = webResponse.GetResponseStream())
-                {
-                    using (var reader = new StreamReader(stream))
-                    {
-                        var result = JsonConvert.DeserializeObject<dynamic>(await reader.ReadToEndAsync());
-                        pick = new Random().Next((int)result["total"]);
+                using var stream = webResponse.GetResponseStream();
+                using var reader = new StreamReader(stream);
+                var result = JsonConvert.DeserializeObject<dynamic>(await reader.ReadToEndAsync());
+                pick = new Random().Next((int)result["total"]);
 
-                        if (pick < result["businesses"].Count)
-                        {
-                            embed = BuildEmbed(result["businesses"][pick]);
-                        }
-                    }
+                if (pick < result["businesses"].Count)
+                {
+                    embed = BuildEmbed(result["businesses"][pick]);
                 }
             }
 
@@ -216,18 +206,12 @@ namespace CyberButler.Commands
                 request = (HttpWebRequest)WebRequest.Create(url);
                 request.Headers["Authorization"] = "Bearer " + Configuration.Config["YelpAPIKey"];
 
-                using (HttpWebResponse webResponse = (HttpWebResponse)await request.GetResponseAsync())
-                {
-                    using (var stream = webResponse.GetResponseStream())
-                    {
-                        using (var reader = new StreamReader(stream))
-                        {
-                            var result = JsonConvert.DeserializeObject<dynamic>(await reader.ReadToEndAsync());
+                using HttpWebResponse webResponse = (HttpWebResponse)await request.GetResponseAsync();
+                using var stream = webResponse.GetResponseStream();
+                using var reader = new StreamReader(stream);
+                var result = JsonConvert.DeserializeObject<dynamic>(await reader.ReadToEndAsync());
 
-                            embed = BuildEmbed(result["businesses"][0]);
-                        }
-                    }
-                }
+                embed = BuildEmbed(result["businesses"][0]);
             }
 
             return embed;
@@ -239,7 +223,7 @@ namespace CyberButler.Commands
             var rating = (string)_business["rating"];
             var reviews = (string)_business["review_count"];
             var price = (string)_business["price"] ?? "N/A";
-            var address = String.Join("\n",_business["location"]["display_address"].ToObject<string[]>());
+            var address = string.Join("\n",_business["location"]["display_address"].ToObject<string[]>());
             var mapUrl = $"https://www.google.com/maps/search/?api=1&query={WebUtility.UrlEncode(address)}";
 
             foreach (var category in _business["categories"])
@@ -252,7 +236,7 @@ namespace CyberButler.Commands
                 Title = (string)_business["name"],
                 Color = DiscordColor.Blurple,
                 Url = (string)_business["url"],
-                Description = String.Join(", ", categories),
+                Description = string.Join(", ", categories),
                 ThumbnailUrl = "http://icons.iconarchive.com/icons/webalys/kameleon.pics/512/Food-Dome-icon.png",
             };
 

@@ -1,9 +1,11 @@
-﻿using CyberButler.DatabaseRecords;
+﻿using CyberButler.Entities;
+using CyberButler.EntityContext;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CyberButler.Commands
@@ -15,23 +17,27 @@ namespace CyberButler.Commands
             Aliases("create"), 
             Description("Example: !customcommand add test This is a test command.")]   
         public async Task Add(CommandContext _ctx,
-            [Description("The command name")]String _command,
-            [Description("The text to display")][RemainingText]String _text)
+            [Description("The command name")] string _command,
+            [Description("The text to display")][RemainingText] string _text)
         {
-            var record = new CommandRecord();
+            using var db = new CyberButlerContext();
+
             var server = _ctx.Guild.Id.ToString();
-            var existingCustom = record.SelectOne(server, _command);
+            var existingCustom = db.CustomCommand.Where(_ => _.Server == server && _.Command == _command).FirstOrDefault();
             var existingDelivered = _ctx.Client.GetCommandsNext().RegisteredCommands.ContainsKey(_command);
 
             if (existingCustom == null && !existingDelivered)
             {
-                record.Server = server;
-                record.Command = _command;
-                record.Text = _text;
+                db.Add(new Entities.CustomCommand()
+                {
+                    Server = server,
+                    Command = _command,
+                    Text = _text
+                });
 
-                record.Insert();
+                await db.SaveChangesAsync();
 
-                await _ctx.RespondAsync($"Added \"{record.Command}\".");
+                await _ctx.RespondAsync($"Added \"{_command}\".");
             }
             else
             {
@@ -45,7 +51,8 @@ namespace CyberButler.Commands
         public async Task Get(CommandContext _ctx)
         {
             var server = _ctx.Guild.Id.ToString();
-            var results = new CommandRecord().SelectAll(server);
+            using var db = new CyberButlerContext();
+            var results = db.CustomCommand.Where(_ => _.Server == server);
 
             var embed = new DiscordEmbedBuilder
             {
@@ -82,13 +89,15 @@ namespace CyberButler.Commands
             Aliases("update"), 
             Description("Example: !customcommand modify test New text")]
         public async Task Modify(CommandContext _ctx, 
-            [Description("The command name")]String _command, 
-            [Description("Updated text")][RemainingText]String _text)
-        {
-            var record = new CommandRecord();
+            [Description("The command name")] string _command, 
+            [Description("Updated text")][RemainingText] string _text)
+        {            
             var server = _ctx.Guild.Id.ToString();
 
-            if (record.SelectOne(server, _command) != null)
+            using var db = new CyberButlerContext();
+            var result = db.CustomCommand.Where(_ => _.Server == server && _.Command == _command).FirstOrDefault();
+
+            if (result != null)
             {
                 await _ctx.RespondAsync($"Are you sure you want to update {_command}? (Yes/No)");
                 var interactivity = _ctx.Client.GetInteractivityModule();
@@ -97,7 +106,8 @@ namespace CyberButler.Commands
 
                 if (msg.Message.Content.ToLower() == "yes")
                 {
-                    record.Update(server, _command, _text);
+                    result.Text = _text;
+                    await db.SaveChangesAsync();
                     await _ctx.RespondAsync($"\"{_command}\" updated.");
                 }
                 else
@@ -115,12 +125,14 @@ namespace CyberButler.Commands
             Aliases("remove"), 
             Description("Example: !customcommand delete test")]
         public async Task Delete(CommandContext _ctx, 
-            [Description("The command name to delete")]String _command)
+            [Description("The command name to delete")] string _command)
         {
-            var record = new CommandRecord();
             var server = _ctx.Guild.Id.ToString();
 
-            if (record.SelectOne(server, _command) != null)
+            using var db = new CyberButlerContext();
+            var result = db.CustomCommand.Where(_ => _.Server == server && _.Command == _command).FirstOrDefault();
+
+            if (result != null)
             {
                 await _ctx.RespondAsync($"Are you sure you want to delete {_command}? (Yes/No)");
                 var interactivity = _ctx.Client.GetInteractivityModule();
@@ -129,7 +141,8 @@ namespace CyberButler.Commands
 
                 if (msg.Message.Content.ToLower() == "yes")
                 {
-                    record.Delete(server, _command);
+                    db.Remove(result);
+                    await db.SaveChangesAsync();
                     await _ctx.RespondAsync($"\"{_command}\" deleted.");
                 }
                 else
