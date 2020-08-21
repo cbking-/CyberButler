@@ -13,6 +13,13 @@ namespace CyberButler.Commands
     [Group("customcommand", CanInvokeWithoutSubcommand = false), Aliases("cc")]
     internal class CustomCommand
     {
+        private readonly CyberButlerContext _dbContext;
+
+        public CustomCommand()
+        {
+            _dbContext = new CyberButlerContext();
+        }
+
         [Command("add"), 
             Aliases("create"), 
             Description("Example: !customcommand add test This is a test command.")]   
@@ -20,22 +27,20 @@ namespace CyberButler.Commands
             [Description("The command name")] string _command,
             [Description("The text to display")][RemainingText] string _text)
         {
-            using var db = new CyberButlerContext();
-
             var server = _ctx.Guild.Id.ToString();
-            var existingCustom = db.CustomCommand.Where(_ => _.Server == server && _.Command == _command).FirstOrDefault();
+            var existingCustom = _dbContext.CustomCommand.Where(_ => _.Server == server && _.Command == _command).FirstOrDefault();
             var existingDelivered = _ctx.Client.GetCommandsNext().RegisteredCommands.ContainsKey(_command);
 
             if (existingCustom == null && !existingDelivered)
             {
-                db.Add(new Entities.CustomCommand()
+                _dbContext.Add(new Entities.CustomCommand()
                 {
                     Server = server,
                     Command = _command,
                     Text = _text
                 });
 
-                await db.SaveChangesAsync();
+                await _dbContext.SaveChangesAsync();
 
                 await _ctx.RespondAsync($"Added \"{_command}\".");
             }
@@ -51,8 +56,7 @@ namespace CyberButler.Commands
         public async Task Get(CommandContext _ctx)
         {
             var server = _ctx.Guild.Id.ToString();
-            using var db = new CyberButlerContext();
-            var results = db.CustomCommand.Where(_ => _.Server == server);
+            var results = _dbContext.CustomCommand.Where(_ => _.Server == server);
 
             var embed = new DiscordEmbedBuilder
             {
@@ -94,8 +98,7 @@ namespace CyberButler.Commands
         {            
             var server = _ctx.Guild.Id.ToString();
 
-            using var db = new CyberButlerContext();
-            var result = db.CustomCommand.Where(_ => _.Server == server && _.Command == _command).FirstOrDefault();
+            var result = _dbContext.CustomCommand.Where(_ => _.Server == server && _.Command == _command).FirstOrDefault();
 
             if (result != null)
             {
@@ -107,7 +110,7 @@ namespace CyberButler.Commands
                 if (msg.Message.Content.ToLower() == "yes")
                 {
                     result.Text = _text;
-                    await db.SaveChangesAsync();
+                    await _dbContext.SaveChangesAsync();
                     await _ctx.RespondAsync($"\"{_command}\" updated.");
                 }
                 else
@@ -129,8 +132,7 @@ namespace CyberButler.Commands
         {
             var server = _ctx.Guild.Id.ToString();
 
-            using var db = new CyberButlerContext();
-            var result = db.CustomCommand.Where(_ => _.Server == server && _.Command == _command).FirstOrDefault();
+            var result = _dbContext.CustomCommand.Where(_ => _.Server == server && _.Command == _command).FirstOrDefault();
 
             if (result != null)
             {
@@ -141,8 +143,8 @@ namespace CyberButler.Commands
 
                 if (msg.Message.Content.ToLower() == "yes")
                 {
-                    db.Remove(result);
-                    await db.SaveChangesAsync();
+                    _dbContext.Remove(result);
+                    await _dbContext.SaveChangesAsync();
                     await _ctx.RespondAsync($"\"{_command}\" deleted.");
                 }
                 else

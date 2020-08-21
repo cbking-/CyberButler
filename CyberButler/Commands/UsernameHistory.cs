@@ -11,6 +11,13 @@ namespace CyberButler.Commands
         Aliases("uh")]
     internal class UsernameHistory
     {
+        private readonly CyberButlerContext _dbContext;
+
+        public UsernameHistory()
+        {
+            _dbContext = new CyberButlerContext();
+        }
+
         [Command("get"),
             Aliases("list", "read"),
             Description("Example: !usernamehistory get @UserName")]
@@ -26,8 +33,7 @@ namespace CyberButler.Commands
 
             var server = _ctx.Guild.Id.ToString();
 
-            using var db = new CyberButlerContext();
-            var results = db.UsernameHistory.Where(_ => _.Server == server && _.UserID == _userId.Id.ToString());
+            var results = _dbContext.UsernameHistory.Where(_ => _.Server == server && _.UserID == _userId.Id.ToString());
 
             foreach (var record in results)
             {
