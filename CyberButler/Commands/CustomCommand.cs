@@ -1,5 +1,4 @@
-﻿using CyberButler.Entities;
-using CyberButler.EntityContext;
+﻿using CyberButler.EntityContext;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -10,14 +9,14 @@ using System.Threading.Tasks;
 
 namespace CyberButler.Commands
 {
-    [Group("customcommand", CanInvokeWithoutSubcommand = false), Aliases("cc")]
-    internal class CustomCommand
+    [Group("customcommand"), Aliases("cc")]
+    internal class CustomCommand : BaseCommandModule
     {
         private readonly CyberButlerContext _dbContext;
 
-        public CustomCommand()
+        public CustomCommand(CyberButlerContext db)
         {
-            _dbContext = new CyberButlerContext();
+            _dbContext = db;
         }
 
         [Command("add"), 
@@ -103,11 +102,11 @@ namespace CyberButler.Commands
             if (result != null)
             {
                 await _ctx.RespondAsync($"Are you sure you want to update {_command}? (Yes/No)");
-                var interactivity = _ctx.Client.GetInteractivityModule();
+                var interactivity = _ctx.Client.GetInteractivity();
                 var msg = await interactivity.WaitForMessageAsync(xm => xm.Author.Id == _ctx.User.Id, 
                     TimeSpan.FromMinutes(1));
 
-                if (msg.Message.Content.ToLower() == "yes")
+                if (msg.Result.Content.ToLower() == "yes")
                 {
                     result.Text = _text;
                     await _dbContext.SaveChangesAsync();
@@ -137,11 +136,11 @@ namespace CyberButler.Commands
             if (result != null)
             {
                 await _ctx.RespondAsync($"Are you sure you want to delete {_command}? (Yes/No)");
-                var interactivity = _ctx.Client.GetInteractivityModule();
+                var interactivity = _ctx.Client.GetInteractivity();
                 var msg = await interactivity.WaitForMessageAsync(xm => xm.Author.Id == _ctx.User.Id, 
                     TimeSpan.FromMinutes(1));
 
-                if (msg.Message.Content.ToLower() == "yes")
+                if (msg.Result.Content.ToLower() == "yes")
                 {
                     _dbContext.Remove(result);
                     await _dbContext.SaveChangesAsync();

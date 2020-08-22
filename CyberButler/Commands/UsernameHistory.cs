@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace CyberButler.Commands
 {
-    [Group("usernamehistory", CanInvokeWithoutSubcommand = false),
+    [Group("usernamehistory"),
         Aliases("uh")]
-    internal class UsernameHistory
+    internal class UsernameHistory : BaseCommandModule
     {
         private readonly CyberButlerContext _dbContext;
 
@@ -27,7 +27,10 @@ namespace CyberButler.Commands
             var embed = new DiscordEmbedBuilder
             {
                 Title = $"{_userId.DisplayName} History",
-                ThumbnailUrl = _userId.AvatarUrl,
+                Thumbnail = new DiscordEmbedBuilder.EmbedThumbnail()
+                    {
+                        Url = _userId.AvatarUrl 
+                    },
                 Color = _userId.Color
             };
 

@@ -6,7 +6,9 @@ using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
+using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -27,8 +29,6 @@ namespace CyberButler
 
         public async Task Run() {
             DiscordClient discord;
-            CommandsNextModule commands;
-
             _dbContext.Database.EnsureCreated();
 
             //Create the Discord client
@@ -41,20 +41,22 @@ namespace CyberButler
             discord.UseInteractivity(new InteractivityConfiguration
             {
                 // default pagination behaviour to just ignore the reactions
-                PaginationBehaviour = TimeoutBehaviour.Ignore,
-
-                // default pagination timeout to 5 minutes
-                PaginationTimeout = TimeSpan.FromMinutes(5),
+                PaginationBehaviour = DSharpPlus.Interactivity.Enums.PaginationBehaviour.Ignore,
 
                 // default timeout for other actions to 2 minutes
                 Timeout = TimeSpan.FromMinutes(2)
             });
 
+            var deps = new ServiceCollection()
+                .AddSingleton(_dbContext)
+                .BuildServiceProvider();
+
             //Create the commands configuration using the prefix defined in the config file
-            commands = discord.UseCommandsNext(new CommandsNextConfiguration
+            var commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
-                StringPrefix = Configuration.Config["CommandPrefix"],
-                CaseSensitive = bool.Parse(Configuration.Config["CommandCaseSensitive"])
+                StringPrefixes = new List<string>() { Configuration.Config["CommandPrefix"] },
+                CaseSensitive = bool.Parse(Configuration.Config["CommandCaseSensitive"]),
+                Services = deps
             });
 
             commands.CommandErrored += Commands_CommandErrored;

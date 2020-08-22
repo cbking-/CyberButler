@@ -11,7 +11,7 @@ using System.Web;
 
 namespace CyberButler.Commands
 {
-    public class MyCommands
+    public class MyCommands : BaseCommandModule
     {
         [Command("random"),
             Description("Generate a random number between the provided min and max.")]
@@ -73,7 +73,7 @@ namespace CyberButler.Commands
 
             var embed = new DiscordEmbedBuilder();
             var url = @"https://emojipedia-us.s3.amazonaws.com/thumbs/120/microsoft/135/billiards_1f3b1.png";
-            embed.WithThumbnailUrl(url);
+            embed.WithThumbnail(url);
             embed.AddField("Question:", _question);
             embed.AddField("CyberButler Says:", responses[random.Next(responses.Count)]);
 
@@ -125,8 +125,9 @@ namespace CyberButler.Commands
             [Description("Game to be set."), RemainingText] string _game)
         {
             await ctx.Client.UpdateStatusAsync(
-                new DiscordGame
+                new DiscordActivity
                 {
+                    ActivityType = ActivityType.Playing,
                     Name = _game
                 }
             );
@@ -237,7 +238,7 @@ namespace CyberButler.Commands
                 Color = DiscordColor.Blurple,
                 Url = (string)_business["url"],
                 Description = string.Join(", ", categories),
-                ThumbnailUrl = "http://icons.iconarchive.com/icons/webalys/kameleon.pics/512/Food-Dome-icon.png",
+                Thumbnail = new DiscordEmbedBuilder.EmbedThumbnail() { Url = "http://icons.iconarchive.com/icons/webalys/kameleon.pics/512/Food-Dome-icon.png" },
             };
 
             embed.AddField("Rating (Reviews)", $"{rating} ({reviews})", true);
