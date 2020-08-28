@@ -1,0 +1,42 @@
+﻿@page "/customcommands"
+
+@using CyberButler.Console.Data
+@inject CustomCommandService service
+
+<h1>Custom Commands</h1>
+
+@if (commands == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Server</th>
+                <th>Command</th>
+                <th>Text</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var command in commands)
+            {
+                <tr>
+                    <td>@command.Server</td>
+                    <td>@command.Command</td>
+                    <td>@command.Text</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<CyberButler.Data.Entities.CustomCommand> commands;
+
+    protected override async Task OnInitializedAsync()
+    {
+        commands = await service.GetCommandsAsync();
+    }
+}

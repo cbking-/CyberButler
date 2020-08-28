@@ -1,5 +1,4 @@
-﻿using CyberButler.Commands;
-using CyberButler.EntityContext;
+﻿using CyberButler.Data.EntityContext;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CyberButler

@@ -1,5 +1,5 @@
 ﻿using CyberButler.Commands;
-using CyberButler.EntityContext;
+using CyberButler.Data.EntityContext;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
@@ -48,7 +48,7 @@ namespace CyberButler
             });
 
             var deps = new ServiceCollection()
-                .AddSingleton(_dbContext)
+                .AddDbContext<CyberButlerContext>()
                 .BuildServiceProvider();
 
             //Create the commands configuration using the prefix defined in the config file
@@ -130,7 +130,7 @@ namespace CyberButler
             {
                 if (e.NicknameAfter != e.NicknameBefore)
                 {
-                    _dbContext.Add(new Entities.UsernameHistory()
+                    _dbContext.Add(new Data.Entities.UsernameHistory()
                     {
                         Server = e.Guild.Id.ToString(),
                         UserID = e.Member.Id.ToString(),
@@ -207,7 +207,7 @@ namespace CyberButler
                 var command = e.Context.Message.Content.Substring(1);
                 var server = e.Context.Guild.Id.ToString();
                 
-                var result = new Entities.CustomCommand();
+                var result = new Data.Entities.CustomCommand();
 
                 if (bool.Parse(Configuration.Config["CommandCaseSensitive"]))
                 {
@@ -257,6 +257,18 @@ namespace CyberButler
                 };
 
                 await e.Context.RespondAsync("", embed: embed);
+
+                if(!(e.Exception.InnerException is null))
+                {
+                    embed = new DiscordEmbedBuilder
+                    {
+                        Title = "Error",
+                        Description = $"{e.Exception.InnerException.Message}",
+                        Color = DiscordColor.Red
+                    };
+
+                    await e.Context.RespondAsync("", embed: embed);
+                }
             }
         }
     }

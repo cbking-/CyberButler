@@ -1,4 +1,4 @@
-﻿using CyberButler.EntityContext;
+﻿using CyberButler.Data.EntityContext;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -32,7 +32,7 @@ namespace CyberButler.Commands
 
             if (existingCustom == null && !existingDelivered)
             {
-                _dbContext.Add(new Entities.CustomCommand()
+                _dbContext.Add(new Data.Entities.CustomCommand()
                 {
                     Server = server,
                     Command = _command,
